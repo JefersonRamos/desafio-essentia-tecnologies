@@ -1,145 +1,101 @@
-# Desafio TechX — infraestrutura Docker
+# Wiki mantido por LLM
 
-Stack de 5 containers orquestrada por Docker Compose: um nginx na borda, o front em
-Angular, uma API em Express + TypeScript e dois bancos — MySQL para os dados da
-aplicação e MongoDB para os logs de requisição.
+Um wiki de markdown que um LLM escreve e mantém a partir das fontes que você lhe dá.
 
-## Arquitetura
+A diferença para RAG: em RAG o LLM redescobre o conhecimento a cada pergunta —
+recupera trechos, responde, esquece. Nada se acumula. Aqui o conhecimento é
+compilado uma vez e mantido: quando uma fonte nova entra, o LLM lê, extrai e
+**integra** ao que já existe — atualiza páginas de entidade, revisa sínteses, marca
+onde o dado novo contradiz o antigo. As referências cruzadas já estão feitas, as
+contradições já estão sinalizadas. O wiki fica mais rico a cada fonte e a cada
+pergunta.
+
+Obsidian de um lado, agente do outro: o LLM edita, você navega os links e o grafo em
+tempo real. O Obsidian é a IDE, o LLM é o programador, o wiki é o código.
+
+## Como funciona
+
+Duas camadas:
+
+| Camada | Onde | Quem escreve |
+|---|---|---|
+| **Wiki** | `wiki/` | o LLM, inteiramente. Fontes, entidades, conceitos, síntese. |
+| **Schema** | `CLAUDE.md` | os dois. Define convenções e workflows. |
+
+Não existe uma pasta de fontes brutas. A fonte chega como URL, arquivo, transcrição
+ou texto colado, e a página em `wiki/sources/` vira o **registro canônico** dela:
+proveniência no frontmatter, conteúdo destilado no corpo, citações precisas o
+bastante para voltar ao original. Se a fonte sumir da internet, essa página é o que
+resta.
+
+O schema é a peça central: é o que transforma o LLM num mantenedor de wiki
+disciplinado em vez de um chatbot genérico. Ele e você o coevoluem conforme
+descobrem o que funciona no seu domínio.
 
 ```
-                          ┌───────────────────────────────┐
-   navegador ──── :8080 ──│  nginx  (único ponto público) │
-                          └───────────┬───────────────────┘
-                              /       │       /api/
-                              ▼       │       ▼
-                    ┌──────────────┐  │  ┌──────────────────────┐
-                    │ web (Angular)│  │  │ api (Express + TS)   │
-                    └──────────────┘  │  └───────┬──────────────┘
-                                      │          │
-                     rede: frontend ──┘          │  rede: backend
-                                                 ▼
-                                    ┌────────────┴────────────┐
-                                    ▼                         ▼
-                            ┌──────────────┐         ┌────────────────┐
-                            │ mysql (dados)│         │ mongo  (logs)  │
-                            └──────────────┘         └────────────────┘
+wiki/
+  overview.md   porta de entrada
+  synthesis.md  tese evolutiva, tensões abertas, gaps
+  index.md      catálogo de todas as páginas
+  log.md        registro cronológico append-only
+  sources/      uma página por fonte — o registro canônico dela
+  entities/     pessoas, organizações, produtos, lugares
+  concepts/     ideias, temas, mecanismos
+  analyses/     respostas de query arquivadas
+  assets/       imagens e anexos
+CLAUDE.md       o schema
 ```
 
-São duas redes bridge. `web` está só na `frontend`, então **não alcança os bancos** —
-todo acesso a dado passa pela API. Os bancos ficam só na `backend`.
+`index.md` é orientado a conteúdo — um catálogo com resumo de uma linha por página.
+É o que o LLM lê primeiro numa pergunta, antes de abrir qualquer página. Funciona
+surpreendentemente bem até algumas centenas de páginas, sem precisar de embeddings.
 
-O nginx é a única porta publicada: o front chama `/api/...` no mesmo host e origem,
-sem CORS no navegador.
-
-Dentro da rede, `web` escuta na `80` e `api` na `3000` nos dois ambientes — por isso
-o `nginx/default.conf` é um arquivo estático, igual em dev e prod.
-
-## Pré-requisitos
-
-- Docker Engine 24+ e Docker Compose v2 (`docker compose`, sem hífen)
-- No Windows: Docker Desktop com WSL Integration habilitada para a distro
-
-## Como rodar
+`log.md` é cronológico e append-only. Cabeçalho em formato fixo, então vira dado:
 
 ```bash
-cp .env.example .env
-docker compose up -d --build
+grep "^## \[" wiki/log.md | tail -5
 ```
 
-Front em <http://localhost:8080> e API em <http://localhost:8080/api>.
+## Operações
 
-Produção:
+**Ingest.** Você manda uma fonte e pede para processar. O LLM lê, discute os
+takeaways com você, escreve a página de fonte, propaga para as páginas de entidade e
+conceito afetadas, revisa a síntese, atualiza o índice e registra no log. Uma fonte
+boa toca 10–15 páginas. Ingerir uma de cada vez e ficar no circuito dá o melhor
+resultado — mas dá para pedir lote com menos supervisão.
 
-```bash
-docker compose -f docker-compose.prod.yml up -d --build
-```
+**Query.** Você pergunta contra o wiki. O LLM lê o índice, abre as páginas relevantes
+e responde com citações. Quando a resposta tem valor durável, ela é arquivada em
+`analyses/` — assim suas explorações compõem no wiki do mesmo jeito que as fontes.
 
-Os dois arquivos são independentes — cada um descreve os 5 serviços por inteiro,
-sem merge de override.
+**Lint.** De tempos em tempos, um health check: contradições, afirmações que uma fonte
+nova já superou, páginas órfãs, links quebrados, conceitos citados sem página própria,
+páginas de fonte magras demais, gaps. O LLM reporta e propõe; você aprova.
 
-|                | dev                                  | prod                              |
-| -------------- | ------------------------------------ | --------------------------------- |
-| build          | stage `dev`                          | stage `prod`                      |
-| código         | bind-mount do host, com hot reload   | copiado para dentro da imagem     |
-| front          | `ng serve`                           | build estático servido por nginx  |
-| nginx          | publicado na `8080`                  | publicado na `80`                 |
-| senhas         | default do `.env.example`            | exigidas do `.env`                |
-| MySQL / Mongo  | porta em `127.0.0.1` para GUIs       | sem porta publicada               |
-| projeto        | `techx`                              | `techx-prod` (volumes separados)  |
+## Uso
 
-## Estrutura
+Converse com o agente na raiz do repo:
 
 ```
-docker-compose.yml        stack de desenvolvimento
-docker-compose.prod.yml   stack de produção
-.env.example              modelo de variáveis (copiar para .env)
-
-nginx/
-  Dockerfile
-  default.conf            proxy de borda: / -> web:80, /api/ -> api:3000
-
-api/
-  Dockerfile              stages: dev | build | prod
-  .dockerignore
-
-web/
-  Dockerfile              stages: dev | build | prod
-  nginx.conf              serve o Angular compilado (usado no stage prod)
-  .dockerignore
+"ingira https://exemplo.com/artigo"
+"ingira esse pdf aqui: ~/Downloads/relatorio.pdf"
+"o que as fontes dizem sobre X?"
+"roda um lint no wiki"
 ```
 
-Os dados dos bancos ficam em volumes nomeados (`mysql_data`, `mongo_data`), então
-sobrevivem a `docker compose down`. Para zerar, `docker compose down -v`.
+Abra a raiz do repo como vault no Obsidian para navegar os wikilinks e o grafo.
+O wiki é só um repo git de markdown — histórico, branch e diff saem de graça.
 
-## Variáveis de ambiente
+## Por que funciona
 
-| Variável                                | Default          | Para que serve                          |
-| --------------------------------------- | ---------------- | --------------------------------------- |
-| `NGINX_PORT`                            | `8080` (dev)     | porta pública da stack                  |
-| `API_PORT`                              | `3000`           | porta da API dentro da rede             |
-| `MYSQL_DATABASE` / `MYSQL_USER`         | `techx`          | banco e usuário da aplicação            |
-| `MYSQL_PASSWORD`                        | `techx_secret`   | senha do usuário da aplicação           |
-| `MYSQL_ROOT_PASSWORD`                   | `root_secret`    | senha de root do MySQL                  |
-| `MYSQL_HOST_PORT`                       | `3306`           | porta no host, só em dev                |
-| `MONGO_ROOT_USERNAME` / `..._PASSWORD`  | `root` / `root_secret` | credenciais do Mongo              |
-| `MONGO_DATABASE`                        | `techx_logs`     | banco de logs                           |
-| `MONGO_HOST_PORT`                       | `27017`          | porta no host, só em dev                |
-| `LOG_RETENTION_DAYS`                    | `60`             | retenção dos logs, aplicada pela API    |
+A parte cansativa de um wiki não é ler nem pensar — é a burocracia: atualizar
+referência cruzada, manter resumo em dia, anotar quando um dado novo contradiz o
+antigo, manter consistência entre dezenas de páginas. Humanos abandonam wikis porque
+o custo de manutenção cresce mais rápido que o valor. O LLM não enjoa, não esquece de
+atualizar um link e mexe em 15 arquivos numa passada. Sobra para você o que importa:
+curar fontes, dirigir a análise, fazer as perguntas certas.
 
-Em produção as três senhas não têm default: precisam estar no `.env` ou os
-containers de banco falham no boot.
+---
 
-## O que os Dockerfiles esperam das aplicações
-
-**`api/`** — `package.json` com os scripts:
-
-| script  | comando esperado          | usado em      |
-| ------- | ------------------------- | ------------- |
-| `dev`   | watch do TypeScript       | stage `dev`   |
-| `build` | compila para `dist/`      | stage `build` |
-| `start` | `node dist/server.js`     | stage `prod`  |
-
-O servidor deve escutar na porta `3000` (`process.env.PORT`) e tolerar os bancos
-ainda não estarem prontos — o `depends_on` garante ordem de start, não readiness.
-A conexão inicial precisa de retry.
-
-**`web/`** — projeto Angular com `npm start` = `ng serve` e `npm run build` gerando
-`dist/web/browser` (padrão do builder `@angular/build:application`). O stage `prod`
-copia essa pasta para dentro do nginx.
-
-## Comandos úteis
-
-```bash
-docker compose logs -f api           # logs de um serviço
-docker compose ps                    # estado dos containers
-docker compose restart api           # reinicia sem rebuild
-docker compose up -d --build api     # rebuild de um serviço só
-docker compose down                  # derruba, mantém os dados
-docker compose down -v               # derruba e APAGA os volumes
-
-docker compose exec mysql mysql -utechx -p techx
-docker compose exec mongo mongosh -u root -p --authenticationDatabase admin
-```
-
-Em dev os containers têm nome fixo (`techx-api`, `techx-web`, `techx-nginx`,
-`techx-mysql`, `techx-mongo`), então `docker logs techx-api` também funciona.
+Este repositório também contém a stack Docker do desafio de infraestrutura,
+documentada em [`docs/infra.md`](docs/infra.md).
