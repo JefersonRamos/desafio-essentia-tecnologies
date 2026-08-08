@@ -1,9 +1,12 @@
 import { createApp } from './app.js';
 import { env } from './config/env.js';
+import { initI18n } from './i18n/index.js';
 import { logger } from './logging/logger.js';
 import { connectMongo, disconnectMongo } from './logging/mongo.js';
 
 async function start(): Promise<void> {
+  await initI18n();
+
   try {
     await connectMongo();
   } catch (error) {
