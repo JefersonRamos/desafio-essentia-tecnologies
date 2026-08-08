@@ -1,3 +1,5 @@
 <app-navigation />
-
+@for (tasks of [1,2]; track tasks) {
+    <app-task-card />
+}
 <router-outlet />

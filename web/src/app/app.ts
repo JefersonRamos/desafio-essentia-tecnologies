@@ -3,10 +3,11 @@ import { RouterOutlet } from '@angular/router';
 
 // Components
 import { Navigation } from "./navigation/navigation";
+import {TaskCard} from "./task-card/task-card";
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Navigation],
+  imports: [RouterOutlet, Navigation, TaskCard],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

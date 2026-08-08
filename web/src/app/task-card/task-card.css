@@ -1,0 +1,17 @@
+@reference '../../styles.css';
+
+/* O cartão é a própria caixa do componente, então a moldura mora no :host —
+   um template não consegue estilizar o elemento que o contém. */
+:host {
+  @apply flex cursor-grab flex-col gap-[9px] rounded-card border border-line bg-surface p-[13px] shadow-card;
+  animation: var(--animate-card-in);
+}
+
+:host(:hover) {
+  @apply border-line-strong shadow-lift;
+}
+
+/* Enquanto arrastado, o original desbota e o navegador mostra o fantasma. */
+:host([data-dragging='true']) {
+  @apply opacity-40;
+}
