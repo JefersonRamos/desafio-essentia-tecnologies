@@ -8,8 +8,7 @@ COPY package*.json ./
 # ---- dev ----
 FROM base AS dev
 ENV NODE_ENV=development
-RUN echo 'Hello World'
-#RUN npm install
+RUN npm install
 COPY . .
 EXPOSE 3000
 CMD ["npm", "run", "dev"]
