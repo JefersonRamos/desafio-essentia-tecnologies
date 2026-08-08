@@ -1,0 +1,68 @@
+<!-- código da tarefa + prioridade -->
+<div class="flex items-center gap-2">
+  <span class="inline-flex items-center gap-1 text-[11.5px] font-medium text-muted">
+    <i class="fa-solid fa-link"></i>TAR - 28
+  </span>
+
+  <span
+    class="inline-flex items-center gap-1 rounded-tag bg-danger-soft px-[7px] py-0.5 text-[11px] font-semibold text-danger"
+  >
+    <i class="fa-solid fa-flag"></i>Urgente
+  </span>
+</div>
+
+<!-- título + projeto -->
+<div class="flex flex-col gap-0.5">
+  <span class="text-[13.5px] leading-[1.35] font-semibold text-ink">Configurar projeto Angular</span>
+  <span class="text-xs text-muted">Front-end</span>
+</div>
+
+<!-- prazo -->
+<span
+  class="inline-flex items-center gap-[5px] self-start rounded-chip border border-line-subtle bg-surface-subtle px-2 py-1 text-[11.5px] text-secondary"
+>
+  <i class="fa-solid fa-calendar"></i>Prazo: <b class="font-semibold">09 de ago.</b>
+</span>
+
+<!-- responsáveis, comentários e ações -->
+<div class="flex items-center gap-2 border-t border-line-subtle pt-[9px]">
+  <div class="flex">
+    <span
+      class="size-[22px] rounded-full border-2 border-surface bg-linear-[135deg] from-av-amber-from to-av-amber-to"
+    ></span>
+    <span
+      class="-ml-[7px] size-[22px] rounded-full border-2 border-surface bg-linear-[135deg] from-av-coral-from to-av-coral-to"
+    ></span>
+  </div>
+
+  <span class="inline-flex flex-none items-center gap-1 text-[11.5px] whitespace-nowrap text-muted">
+    <i class="fa-solid fa-comment"></i>16
+  </span>
+
+  <button
+    type="button"
+    title="Marcar como concluída"
+    aria-label="Marcar como concluída"
+    class="ml-auto grid size-[26px] cursor-pointer place-items-center rounded-chip border border-line bg-surface text-[13px] text-success hover:bg-surface-hover"
+  >
+    <i class="fa-solid fa-check"></i>
+  </button>
+
+  <button
+    type="button"
+    title="Editar"
+    aria-label="Editar"
+    class="grid size-[26px] cursor-pointer place-items-center rounded-chip border border-line bg-surface text-[13px] text-tertiary hover:bg-surface-hover hover:text-ink"
+  >
+    <i class="fa-solid fa-pencil"></i>
+  </button>
+
+  <button
+    type="button"
+    title="Remover"
+    aria-label="Remover"
+    class="grid size-[26px] cursor-pointer place-items-center rounded-chip border border-line bg-surface text-[13px] text-tertiary hover:border-danger-line hover:bg-danger-soft hover:text-danger"
+  >
+    <i class="fa-solid fa-trash"></i>
+  </button>
+</div>

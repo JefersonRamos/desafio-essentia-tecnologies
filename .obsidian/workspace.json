@@ -11,10 +11,17 @@
             "id": "7f9d29a3bae722f0",
             "type": "leaf",
             "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Graph view"
+              "type": "canvas",
+              "state": {
+                "file": "wiki/Untitled.canvas",
+                "viewState": {
+                  "x": 0,
+                  "y": 0,
+                  "zoom": 0
+                }
+              },
+              "icon": "lucide-layout-dashboard",
+              "title": "Untitled"
             }
           }
         ]
@@ -95,6 +102,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "wiki/Untitled.canvas",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -113,6 +121,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
+                "file": "wiki/Untitled.canvas",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
@@ -155,6 +164,7 @@
             "state": {
               "type": "outline",
               "state": {
+                "file": "wiki/Untitled.canvas",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -183,8 +193,43 @@
   },
   "active": "7f9d29a3bae722f0",
   "lastOpenFiles": [
-    "README.md",
-    "CLAUDE.md",
-    "wiki/index.md"
+    "web/src/app/app.html~",
+    "web/src/app/task-card/task-card.html~",
+    "web/src/app/app.ts~",
+    "web/dist/code/browser/media/fa-v4compatibility-4GXT74DT.woff2",
+    "web/dist/code/browser/media/fa-solid-900-EFITDVWS.woff2",
+    "web/dist/code/browser/media/fa-regular-400-NCGHE5NP.woff2",
+    "web/dist/code/browser/media/fa-brands-400-LA6RBN2H.woff2",
+    "web/dist/code/browser/styles-MWBVPYHP.css",
+    "web/dist/code/browser/media",
+    "web/dist/code/browser/main-HSMM55MR.js",
+    "web/dist/code/browser/index.html",
+    "web/README.md",
+    "wiki/index.md",
+    "wiki/Untitled.canvas",
+    "web/code/node_modules/@angular/common/README.md",
+    "web/code/node_modules/rxjs/README.md",
+    "web/code/node_modules/rxjs/CODE_OF_CONDUCT.md",
+    "web/code/node_modules/rxjs/CHANGELOG.md",
+    "web/code/node_modules/jsdom/README.md",
+    "web/code/node_modules/@modelcontextprotocol/sdk/README.md",
+    "web/code/node_modules/caniuse-lite/README.md",
+    "web/code/node_modules/@angular/build/README.md",
+    "web/code/node_modules/hono/README.md",
+    "web/code/node_modules/@angular/cli/README.md",
+    "web/code/node_modules/@angular/cli/src/commands/update/long-description.md",
+    "web/code/node_modules/@angular/cli/src/commands/test/long-description.md",
+    "web/code/node_modules/@angular/cli/src/commands/run/long-description.md",
+    "web/code/node_modules/@angular/cli/src/commands/new/long-description.md",
+    "web/code/node_modules/@angular/cli/src/commands/lint/long-description.md",
+    "web/code/node_modules/@angular/cli/src/commands/deploy/long-description.md",
+    "web/code/node_modules/@angular/cli/src/commands/config/long-description.md",
+    "web/code/node_modules/@angular/cli/src/commands/completion/long-description.md",
+    "web/code/node_modules/@angular/cli/src/commands/cache/long-description.md",
+    "web/code/node_modules/@angular/cli/src/commands/build/long-description.md",
+    "web/code/node_modules/@angular/cli/src/commands/analytics/long-description.md",
+    "web/code/node_modules/@angular/cli/src/commands/add/long-description.md",
+    "web/code/node_modules/@angular/cli/src/commands/mcp/resources/best-practices.md",
+    "web/code/node_modules/ordered-binary/assets/powers-dre.png"
   ]
 }
