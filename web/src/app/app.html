@@ -1,5 +1,7 @@
 <app-navigation />
-@for (tasks of [1,2]; track tasks) {
-    <app-task-card />
-}
+<div class="w-100">
+    @for (tasks of [1,2]; track tasks) {
+        <app-task-card />
+    }
+</div>
 <router-outlet />
