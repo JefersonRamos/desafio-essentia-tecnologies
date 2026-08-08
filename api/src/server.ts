@@ -1,0 +1,26 @@
+import { createApp } from './app.js';
+import { env } from './config/env.js';
+import { logger } from './logging/logger.js';
+import { connectMongo, disconnectMongo } from './logging/mongo.js';
+
+async function start(): Promise<void> {
+  try {
+    await connectMongo();
+  } catch (error) {
+    logger.error({ error }, 'mongo indisponível, seguindo sem log de auditoria');
+  }
+
+  const server = createApp().listen(env.port, () => {
+    logger.info({ port: env.port }, 'api no ar');
+  });
+
+  for (const signal of ['SIGINT', 'SIGTERM'] as const) {
+    process.on(signal, () => {
+      server.close(() => {
+        void disconnectMongo().then(() => process.exit(0));
+      });
+    });
+  }
+}
+
+void start();
