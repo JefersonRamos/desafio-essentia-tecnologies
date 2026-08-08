@@ -1,0 +1,25 @@
+# dependências
+node_modules/
+
+# build
+dist/
+build/
+.angular/
+*.tsbuildinfo
+
+# ambiente — .env.example é versionado, .env não
+.env
+.env.*
+!.env.example
+
+# logs
+*.log
+npm-debug.log*
+
+# editores
+.idea/
+.vscode/
+
+# sistema
+.DS_Store
+Thumbs.db

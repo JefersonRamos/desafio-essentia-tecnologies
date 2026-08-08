@@ -1,0 +1,22 @@
+# dependências
+node_modules/
+
+# build
+dist/
+/out-tsc/
+*.tsbuildinfo
+
+# cache do Angular CLI
+.angular/
+
+# ambiente
+.env
+.env.*
+!.env.example
+
+# logs
+*.log
+npm-debug.log*
+
+# testes
+coverage/
