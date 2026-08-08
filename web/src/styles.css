@@ -1,3 +1,111 @@
-/* You can add global styles to this file, and also import other style files */
-
 @import 'tailwindcss';
+
+@theme {
+  /* -- Tipografia -------------------------------------------------------- */
+  --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+
+  /* -- Superfícies ------------------------------------------------------- */
+  --color-canvas: #f7f6f3; /* fundo da aplicação */
+  --color-surface: #ffffff; /* cartões, painéis, barra lateral */
+  --color-surface-subtle: #faf9f7; /* segmented control, chip de prazo */
+  --color-surface-hover: #f2f1ee; /* hover de botões e itens de menu */
+  --color-surface-pill: #f1f0ee; /* pílula da coluna "A fazer" */
+
+  /* -- Linhas ------------------------------------------------------------ */
+  --color-line: #ebe9e4; /* borda padrão */
+  --color-line-subtle: #f0eeea; /* divisórias internas */
+  --color-line-strong: #dcd9d2; /* inputs e borda em hover */
+
+  /* -- Texto ------------------------------------------------------------- */
+  --color-ink: #1c1c1c; /* texto principal e botão sólido */
+  --color-ink-hover: #333330; /* hover do botão sólido */
+  --color-strong: #3f3d38; /* pílula "A fazer" */
+  --color-secondary: #4f4d48; /* rótulos de apoio */
+  --color-tertiary: #6b6963; /* ícones inativos */
+  --color-muted: #8f8d88; /* legendas, metadados, texto concluído */
+  --color-faint: #b5b2ab; /* dica de rodapé */
+
+  /* -- Semânticas -------------------------------------------------------- */
+  --color-danger: #e5484d; /* urgente, "Em andamento", sair, remover */
+  --color-danger-soft: #fdeaea;
+  --color-danger-line: #f7d4d4; /* borda do hover de remover */
+  --color-violet: #8e4ec6; /* média, "Em revisão" */
+  --color-violet-soft: #f4ebfb;
+  --color-success: #2f9e68; /* baixa, "Concluído", marcar como feita */
+  --color-success-soft: #e9f6ee;
+  --color-accent: #ff9d5c; /* marca — ícone do logo */
+  --color-coral: #f2545b; /* par do gradiente de marca */
+  --color-highlight: #fde3d3; /* ::selection */
+
+  /* -- Gradientes de avatar (135°) --------------------------------------- */
+  --color-av-coral-from: #f2545b;
+  --color-av-coral-to: #b23a45;
+  --color-av-violet-from: #8e4ec6;
+  --color-av-violet-to: #5b3a9e;
+  --color-av-amber-from: #ff9d5c;
+  --color-av-amber-to: #d4713a;
+  --color-av-green-from: #2f9e68;
+  --color-av-green-to: #1f6e49;
+
+  /* -- Raios ------------------------------------------------------------- */
+  --radius-rail: 18px; /* barra lateral */
+  --radius-panel: 16px; /* painel principal */
+  --radius-pop: 14px; /* menu flutuante */
+  --radius-card: 13px; /* cartão de tarefa */
+  --radius-control: 12px; /* botão de navegação */
+  --radius-group: 11px; /* segmented control, botão "Nova tarefa" */
+  --radius-btn: 10px; /* botão primário do topo */
+  --radius-input: 9px; /* inputs, botões da toolbar */
+  --radius-chip: 7px; /* chip de prazo, botões de ação do cartão */
+  --radius-tag: 6px; /* tag de prioridade */
+
+  /* -- Sombras ----------------------------------------------------------- */
+  --shadow-rail: 0 8px 24px rgb(28 28 28 / 0.07);
+  --shadow-pop: 0 12px 32px rgb(28 28 28 / 0.12);
+  --shadow-card: 0 1px 2px rgb(28 28 28 / 0.04);
+  --shadow-chip: 0 1px 2px rgb(28 28 28 / 0.05);
+  --shadow-lift: 0 6px 18px rgb(28 28 28 / 0.08);
+
+  /* -- Animação ---------------------------------------------------------- */
+  --animate-card-in: card-in 0.18s ease;
+
+  @keyframes card-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+@layer base {
+  html,
+  body {
+    background: var(--color-canvas);
+  }
+
+  body {
+    font-family: var(--font-sans);
+    color: var(--color-ink);
+  }
+
+  a {
+    color: var(--color-ink);
+  }
+
+  a:hover {
+    color: var(--color-danger);
+  }
+
+  ::selection {
+    background: var(--color-highlight);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+}
