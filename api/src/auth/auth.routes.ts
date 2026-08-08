@@ -21,9 +21,9 @@ authRouter.post('/login', async (req: Request<unknown, unknown, LoginBody>, res:
 
   const user = await findByEmail(email);
 
-  const ok = user ? await verifyPassword(password, user.passwordHash) : false;
+  const verified = user ? await verifyPassword(password, user.passwordHash) : false;
 
-  if (!user || !ok) {
+  if (!user || !verified) {
     res.status(401).json({ error: 'credenciais inválidas' });
     return;
   }

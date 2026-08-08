@@ -4,7 +4,9 @@ import express, {
   type Request,
   type Response,
 } from 'express';
+import swaggerUi from 'swagger-ui-express';
 import { authRouter } from './auth/auth.routes.js';
+import { openapiDocument } from './docs/openapi.js';
 
 export function createApp(): Express {
   const app = express();
@@ -16,6 +18,16 @@ export function createApp(): Express {
   });
 
   app.use('/api/auth', authRouter);
+
+  app.get('/api/openapi.json', (_req: Request, res: Response) => {
+    res.json(openapiDocument);
+  });
+
+  app.use(
+    '/api/docs',
+    swaggerUi.serve,
+    swaggerUi.setup(openapiDocument, { customSiteTitle: 'TechX API' }),
+  );
 
   app.use((_req: Request, res: Response) => {
     res.status(404).json({ error: 'rota não encontrada' });
