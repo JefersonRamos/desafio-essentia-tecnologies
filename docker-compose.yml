@@ -44,7 +44,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:-dev_secret_change_me}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1h}
       # mysql
-      DATABASE_URL: mysql://${MYSQL_USER:-techx}:${MYSQL_PASSWORD:-techx_secret}@mysql:3306/${MYSQL_DATABASE:-techx}
+      DATABASE_URL: mysql://${MYSQL_USER:-techx}:${MYSQL_PASSWORD:-techx_secret}@mysql:3306/${MYSQL_DATABASE:-techx}?allowPublicKeyRetrieval=true
       SHADOW_DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD:-root_secret}@mysql:3306/prisma_migrate_shadow
       MYSQL_HOST: mysql
       MYSQL_PORT: 3306
