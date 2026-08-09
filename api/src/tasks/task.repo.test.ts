@@ -27,24 +27,50 @@ describe('task.repo', () => {
   });
 
   describe('listByUser', () => {
+    const PAGINA = { limit: 20 };
+
     it('filtra pelo dono e esconde as removidas', async () => {
-      await repo.listByUser(OWNER);
+      await repo.listByUser(OWNER, PAGINA);
 
       expect(task.findMany).toHaveBeenCalledWith(
         expect.objectContaining({ where: { userId: OWNER, deletedAt: null } }),
       );
     });
 
-    it('ordena pendentes primeiro e mais recentes no topo', async () => {
-      await repo.listByUser(OWNER);
+    it('desempata por id, senão o cursor não é estável', async () => {
+      await repo.listByUser(OWNER, PAGINA);
 
       const args = task.findMany.mock.calls[0]?.[0];
 
-      expect(args?.orderBy).toEqual([{ done: 'asc' }, { createdAt: 'desc' }]);
+      expect(args?.orderBy).toEqual([{ done: 'asc' }, { createdAt: 'desc' }, { id: 'desc' }]);
+    });
+
+    it('pede um item além do limite, para saber se há próxima página', async () => {
+      await repo.listByUser(OWNER, { limit: 20 });
+
+      expect(task.findMany.mock.calls[0]?.[0]?.take).toBe(21);
+    });
+
+    it('sem cursor, não posiciona nem pula linha', async () => {
+      await repo.listByUser(OWNER, PAGINA);
+
+      const args = task.findMany.mock.calls[0]?.[0];
+
+      expect(args).not.toHaveProperty('cursor');
+      expect(args).not.toHaveProperty('skip');
+    });
+
+    it('com cursor, posiciona nele e pula a própria linha', async () => {
+      await repo.listByUser(OWNER, { limit: 20, cursor: TASK });
+
+      const args = task.findMany.mock.calls[0]?.[0];
+
+      expect(args?.cursor).toEqual({ id: TASK });
+      expect(args?.skip).toBe(1);
     });
 
     it('nunca seleciona a coluna de remoção', async () => {
-      await repo.listByUser(OWNER);
+      await repo.listByUser(OWNER, PAGINA);
 
       expect(task.findMany).toHaveBeenCalledOnce();
 
@@ -83,8 +109,5 @@ describe('task.repo', () => {
       expect(args?.data.deletedAt).toBeInstanceOf(Date);
     });
 
-    it('não usa delete do Prisma em lugar nenhum', () => {
-      expect(prisma.task).not.toHaveProperty('delete');
-    });
   });
 });

@@ -27,10 +27,8 @@ que revogar — revogar por `sub` derrubaria todas as sessões do usuário.
 continua decodificando; o que muda é que a API passa a recusá-lo com
 `auth.token_revoked`. A verdade sobre a sessão saiu do token e foi para o banco.
 
-**O custo é uma query a mais por requisição autenticada.** Somada à que já existia
-([[api-auth-jwt]] registra que `requireAuth` chama `findById`), são duas idas ao
-MySQL por request. A troca foi aceita pelo mesmo motivo da primeira: correção acima
-de latência, com índice cobrindo as duas colunas consultadas.
+**O custo é uma query a mais por requisição autenticada** — ver a seção abaixo, que
+registra a decisão inteira.
 
 **A tabela se limpa sozinha.** `startTokenCleanup` roda no boot e a cada hora, e
 apaga as linhas cujo `expiresAt` já passou — depois do vencimento, a assinatura já
@@ -51,6 +49,35 @@ saiu de `/api/users` para `/api/auth` porque o que ela devolve é sessão, não 
 | Intervalo de limpeza | 1 hora, e uma vez no boot | `token.cleanup.ts:4` |
 | Gravação | `upsert` — revogar duas vezes não quebra | `token.repo.ts` |
 | Cascade | apagar o usuário apaga suas revogações | `schema.prisma` |
+
+## A decisão: duas idas ao banco por requisição autenticada
+
+`requireAuth` consulta o MySQL duas vezes antes de qualquer controller rodar:
+
+```ts
+if (await isRevoked(payload.jti)) ...      // 1: a denylist
+const user = await findById(payload.sub);   // 2: re-hidrata o usuário
+```
+
+A segunda é a discutível. O JWT já traz `sub` e `email`, e a maioria das APIs
+confia no token em vez de recarregar o usuário a cada chamada — bastaria montar
+`req.user` a partir do payload e economizar a query.
+
+**Por que recarrega mesmo assim.** É o mesmo instinto da denylist: a verdade sobre
+quem você é mora no banco, não no token. Recarregar dá três coisas que o payload não
+dá — usuário apagado para de passar na hora (sem esperar o `exp`), mudança de nome ou
+e-mail aparece na requisição seguinte, e `req.user` nunca fica velho em relação ao
+banco. Sem isso, a remoção lógica de [[remocao-logica]] seria parcial: a linha sairia
+das consultas mas o token continuaria valendo até expirar.
+
+**O que custa.** Duas consultas indexadas por request autenticada, ambas por chave
+primária. Nada mede esse custo hoje — não há métrica nem teste de carga, então a
+afirmação "é barato" é expectativa, não medição.
+
+**Como sair disso, se um dia doer.** As duas saídas conhecidas são cache curto do
+usuário em memória (some com múltiplas instâncias, a menos que vire Redis) ou confiar
+no payload e aceitar a janela de `JWT_EXPIRES_IN` para revogação de permissão. Nenhuma
+foi implementada; a segunda desfaria metade do motivo da denylist existir.
 
 ## Fluxo
 
