@@ -186,6 +186,19 @@ export const openapiDocument = {
         },
       },
     },
+    '/auth/logout': {
+      post: {
+        tags: ['Autenticação'],
+        summary: 'Revoga o token atual',
+        description:
+          'Grava o jti do token na denylist até o exp original. O token continua com assinatura válida, mas passa a ser recusado.',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          204: { description: 'Token revogado' },
+          401: { $ref: '#/components/responses/Unauthorized' },
+        },
+      },
+    },
     '/users': {
       post: {
         tags: ['Usuários'],

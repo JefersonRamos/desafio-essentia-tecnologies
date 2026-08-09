@@ -2,7 +2,8 @@ import { HttpError } from '../http/http-error.js';
 import type { User } from '../users/user.model.js';
 import { findByEmail } from '../users/user.repo.js';
 import { verifyPassword } from './password.js';
-import { signToken } from './token.js';
+import { signToken, type TokenPayload } from './token.js';
+import { revoke } from './token.repo.js';
 
 export interface Session {
   token: string;
@@ -18,4 +19,8 @@ export async function login(email: string, password: string): Promise<Session> {
   const user: User = { id: found.id, name: found.name, email: found.email };
 
   return { token: signToken(user), user };
+}
+
+export async function logout(payload: TokenPayload): Promise<void> {
+  await revoke({ id: payload.jti, userId: payload.sub, expiresAt: payload.expiresAt });
 }
