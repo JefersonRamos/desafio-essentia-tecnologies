@@ -9,14 +9,22 @@ function toDetail(issue: ZodIssue): FailDetail {
 
 export function validateBody<T>(schema: ZodType<T>): RequestHandler {
   return (req: Request, _res: Response, next: NextFunction): void => {
-    const result = schema.safeParse(req.body);
-
-    if (!result.success) {
-      throw new HttpError(400, 'common.validationError', result.error.issues.map(toDetail));
-    }
-
-    req.body = result.data;
+    req.body = parse(schema, req.body);
 
     next();
   };
+}
+
+export function parseParams<T>(schema: ZodType<T>, params: unknown): T {
+  return parse(schema, params);
+}
+
+function parse<T>(schema: ZodType<T>, data: unknown): T {
+  const result = schema.safeParse(data);
+
+  if (!result.success) {
+    throw new HttpError(400, 'common.validationError', result.error.issues.map(toDetail));
+  }
+
+  return result.data;
 }

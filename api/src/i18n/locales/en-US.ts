@@ -14,6 +14,9 @@ export const enUS: Messages = {
     forbidden: 'You can only access your own account',
     currentPasswordInvalid: 'Invalid current password',
   },
+  tasks: {
+    notFound: 'Task not found',
+  },
   common: {
     notFound: 'Route not found',
     internalError: 'Internal error',
