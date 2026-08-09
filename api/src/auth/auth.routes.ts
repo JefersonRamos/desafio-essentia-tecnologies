@@ -1,4 +1,5 @@
 import { Router, type Request, type Response } from 'express';
+import { fail } from '../http/fail.js';
 import { findByEmail } from '../users/user.repo.js';
 import { requireAuth } from './auth.middleware.js';
 import { verifyPassword } from './password.js';
@@ -15,7 +16,7 @@ authRouter.post('/login', async (req: Request<unknown, unknown, LoginBody>, res:
   const { email, password } = req.body ?? {};
 
   if (typeof email !== 'string' || typeof password !== 'string' || !email || !password) {
-    res.status(400).json({ error: 'email e password são obrigatórios' });
+    fail(res, 400, 'auth.credentialsRequired');
     return;
   }
 
@@ -24,7 +25,7 @@ authRouter.post('/login', async (req: Request<unknown, unknown, LoginBody>, res:
   const verified = user ? await verifyPassword(password, user.passwordHash) : false;
 
   if (!user || !verified) {
-    res.status(401).json({ error: 'credenciais inválidas' });
+    fail(res, 401, 'auth.invalidCredentials');
     return;
   }
 

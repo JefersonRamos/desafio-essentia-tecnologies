@@ -46,8 +46,19 @@ export const openapiDocument = {
       },
       Error: {
         type: 'object',
-        required: ['error'],
-        properties: { error: { type: 'string', example: 'credenciais inválidas' } },
+        required: ['code', 'error'],
+        properties: {
+          code: {
+            type: 'string',
+            description: 'Identificador estável da condição, independente do idioma.',
+            example: 'auth.invalid_credentials',
+          },
+          error: {
+            type: 'string',
+            description: 'Mensagem traduzida conforme o idioma negociado.',
+            example: 'Credenciais inválidas',
+          },
+        },
       },
       Health: {
         type: 'object',
