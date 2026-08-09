@@ -18,6 +18,9 @@ jobs:
       DATABASE_URL: mysql://techx:techx@localhost:3306/techx
       MONGO_URL: mongodb://localhost:27017
       LOG_LEVEL: silent
+      # o prisma.config.ts resolve esta de forma eager, mesmo no generate,
+      # que não toca em banco nenhum — só migrate dev usa o shadow de verdade
+      SHADOW_DATABASE_URL: mysql://root:root@localhost:3306/prisma_migrate_shadow
 
     steps:
       - uses: actions/checkout@v4
