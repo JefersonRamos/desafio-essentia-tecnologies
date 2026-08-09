@@ -7,10 +7,27 @@ type KeyPath<T, P extends string = ''> = {
 
 export type ErrorKey = KeyPath<typeof ptBR>;
 
+export interface FailDetail {
+  field: string;
+  message: string;
+}
+
 export function errorCode(key: ErrorKey): string {
   return key.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
 }
 
-export function fail(res: Response, status: number, key: ErrorKey): void {
-  res.status(status).json({ code: errorCode(key), error: res.req.t(key) });
+export function fail(
+  res: Response,
+  status: number,
+  key: ErrorKey,
+  details?: readonly FailDetail[],
+): void {
+  const body: { code: string; error: string; details?: readonly FailDetail[] } = {
+    code: errorCode(key),
+    error: res.req.t(key),
+  };
+
+  if (details?.length) body.details = details;
+
+  res.status(status).json(body);
 }

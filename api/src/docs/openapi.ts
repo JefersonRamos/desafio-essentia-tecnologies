@@ -9,6 +9,7 @@ export const openapiDocument = {
   tags: [
     { name: 'Sistema', description: 'Estado do serviço' },
     { name: 'Autenticação', description: 'Login e sessão' },
+    { name: 'Usuários', description: 'Cadastro e gestão da própria conta' },
   ],
   components: {
     securitySchemes: {
@@ -44,6 +45,30 @@ export const openapiDocument = {
           user: { $ref: '#/components/schemas/User' },
         },
       },
+      CreateUserRequest: {
+        type: 'object',
+        required: ['name', 'email', 'password'],
+        properties: {
+          name: { type: 'string', minLength: 2, maxLength: 255, example: 'Candidato' },
+          email: { type: 'string', format: 'email', maxLength: 255, example: 'dev@axyo.com.br' },
+          password: { type: 'string', format: 'password', minLength: 8, maxLength: 128, example: 'senha123' },
+        },
+      },
+      UpdateUserRequest: {
+        type: 'object',
+        description: 'Ao menos um entre name, email e password. Trocar a senha exige currentPassword.',
+        properties: {
+          name: { type: 'string', minLength: 2, maxLength: 255, example: 'Candidato Silva' },
+          email: { type: 'string', format: 'email', maxLength: 255, example: 'novo@axyo.com.br' },
+          password: { type: 'string', format: 'password', minLength: 8, maxLength: 128, example: 'novasenha123' },
+          currentPassword: { type: 'string', format: 'password', example: 'senha123' },
+        },
+      },
+      UserResponse: {
+        type: 'object',
+        required: ['user'],
+        properties: { user: { $ref: '#/components/schemas/User' } },
+      },
       Error: {
         type: 'object',
         required: ['code', 'error'],
@@ -57,6 +82,17 @@ export const openapiDocument = {
             type: 'string',
             description: 'Mensagem traduzida conforme o idioma negociado.',
             example: 'Credenciais inválidas',
+          },
+          details: {
+            type: 'array',
+            description: 'Presente apenas quando a validação do corpo reprova campos.',
+            items: {
+              type: 'object',
+              properties: {
+                field: { type: 'string', example: 'email' },
+                message: { type: 'string', example: 'Invalid email address' },
+              },
+            },
           },
         },
       },
@@ -75,6 +111,18 @@ export const openapiDocument = {
       },
       BadRequest: {
         description: 'Corpo da requisição inválido',
+        content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+      },
+      Forbidden: {
+        description: 'Autenticado, mas a conta não é sua',
+        content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+      },
+      NotFound: {
+        description: 'Usuário inexistente ou removido',
+        content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+      },
+      EmailConflict: {
+        description: 'E-mail já cadastrado',
         content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
       },
     },
@@ -135,6 +183,91 @@ export const openapiDocument = {
             },
           },
           401: { $ref: '#/components/responses/Unauthorized' },
+        },
+      },
+    },
+    '/users': {
+      post: {
+        tags: ['Usuários'],
+        summary: 'Cadastra um usuário',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': { schema: { $ref: '#/components/schemas/CreateUserRequest' } },
+          },
+        },
+        responses: {
+          201: {
+            description: 'Usuário criado',
+            content: {
+              'application/json': { schema: { $ref: '#/components/schemas/UserResponse' } },
+            },
+          },
+          400: { $ref: '#/components/responses/BadRequest' },
+          409: { $ref: '#/components/responses/EmailConflict' },
+        },
+      },
+    },
+    '/users/{id}': {
+      parameters: [
+        {
+          name: 'id',
+          in: 'path',
+          required: true,
+          schema: { type: 'string', format: 'uuid' },
+          description: 'Precisa ser o id do próprio token: não há papel de administrador.',
+        },
+      ],
+      get: {
+        tags: ['Usuários'],
+        summary: 'Consulta a própria conta',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          200: {
+            description: 'Usuário',
+            content: {
+              'application/json': { schema: { $ref: '#/components/schemas/UserResponse' } },
+            },
+          },
+          401: { $ref: '#/components/responses/Unauthorized' },
+          403: { $ref: '#/components/responses/Forbidden' },
+          404: { $ref: '#/components/responses/NotFound' },
+        },
+      },
+      patch: {
+        tags: ['Usuários'],
+        summary: 'Atualiza a própria conta',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': { schema: { $ref: '#/components/schemas/UpdateUserRequest' } },
+          },
+        },
+        responses: {
+          200: {
+            description: 'Usuário atualizado',
+            content: {
+              'application/json': { schema: { $ref: '#/components/schemas/UserResponse' } },
+            },
+          },
+          400: { $ref: '#/components/responses/BadRequest' },
+          401: { $ref: '#/components/responses/Unauthorized' },
+          403: { $ref: '#/components/responses/Forbidden' },
+          404: { $ref: '#/components/responses/NotFound' },
+          409: { $ref: '#/components/responses/EmailConflict' },
+        },
+      },
+      delete: {
+        tags: ['Usuários'],
+        summary: 'Remove a própria conta',
+        description: 'Remoção lógica: a linha permanece com deleted_at e o e-mail segue reservado.',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          204: { description: 'Removido' },
+          401: { $ref: '#/components/responses/Unauthorized' },
+          403: { $ref: '#/components/responses/Forbidden' },
+          404: { $ref: '#/components/responses/NotFound' },
         },
       },
     },
