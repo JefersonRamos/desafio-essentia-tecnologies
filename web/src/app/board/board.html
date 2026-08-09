@@ -1,0 +1,7 @@
+<app-navigation />
+
+<main class="mx-auto flex w-full max-w-[1040px] flex-col gap-3 px-4 py-6">
+  @for (tasks of [1, 2]; track tasks) {
+    <app-task-card />
+  }
+</main>

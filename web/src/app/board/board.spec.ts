@@ -2,19 +2,19 @@ import { provideHttpClient } from "@angular/common/http";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { provideRouter } from "@angular/router";
 
-import { Navigation } from "./navigation";
+import { Board } from "./board";
 
-describe("Navigation", () => {
-  let component: Navigation;
-  let fixture: ComponentFixture<Navigation>;
+describe("Board", () => {
+  let component: Board;
+  let fixture: ComponentFixture<Board>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Navigation],
+      imports: [Board],
       providers: [provideHttpClient(), provideRouter([])],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(Navigation);
+    fixture = TestBed.createComponent(Board);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

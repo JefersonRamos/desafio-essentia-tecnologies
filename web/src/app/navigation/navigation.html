@@ -1,43 +1,66 @@
-<aside class="w-[68px] flex-none py-4 pl-3.5">
-  <div
-    class="sticky top-4 flex flex-col items-center gap-2.5 rounded-rail border border-line bg-surface px-2.5 py-3 shadow-rail"
-  >
-
-    <nav class="flex flex-col gap-1.5">
-      <button
-        type="button"
-        title="Visão geral"
-        aria-label="Visão geral"
-        aria-current="page"
-        class="grid size-10 cursor-pointer place-items-center rounded-control border border-ink bg-ink text-[18px] text-surface"
-      >
-        <i class="fa-solid fa-table-cells-large"></i>
-      </button>
-
-      <button
-        type="button"
-        title="Tarefas"
-        aria-label="Tarefas"
-        class="grid size-10 cursor-pointer place-items-center rounded-control border border-line bg-surface text-[18px] text-tertiary hover:bg-surface-hover"
-      >
-        <i class="fa-solid fa-list-check"></i>
-      </button>
-    </nav>
-
-    <div class="h-px w-[22px] bg-line"></div>
-
-    <button
-      type="button"
-      title="Conta"
-      aria-label="Conta"
-      aria-expanded="false"
-      class="grid size-10 cursor-pointer place-items-center rounded-control border border-line bg-surface p-0 hover:bg-surface-hover"
-    >
+<header class="sticky top-0 z-10 border-b border-line bg-surface">
+  <div class="mx-auto flex w-full max-w-[1040px] items-center gap-3 px-4 py-2.5">
+    <a routerLink="/" class="flex items-center gap-2" aria-label="TechX">
       <span
-        class="grid size-[26px] place-items-center rounded-full bg-linear-[135deg] from-accent to-coral"
+        class="grid size-8 flex-none place-items-center rounded-input bg-linear-[135deg] from-accent to-coral shadow-chip"
       >
-        <i class="fa-solid fa-user text-[14px] text-surface"></i>
+        <i class="fa-solid fa-list-check text-[13px] text-surface"></i>
       </span>
-    </button>
+      <span class="text-[14.5px] font-semibold tracking-tight text-ink">TechX</span>
+    </a>
+
+    <div class="ml-auto flex items-center gap-1.5">
+      <button
+        type="button"
+        (click)="theme.toggle()"
+        [title]="theme.isDark() ? 'Tema claro' : 'Tema escuro'"
+        [attr.aria-label]="theme.isDark() ? 'Mudar para tema claro' : 'Mudar para tema escuro'"
+        [attr.aria-pressed]="theme.isDark()"
+        class="grid size-8 cursor-pointer place-items-center rounded-input border border-line bg-surface text-[13px] text-tertiary hover:bg-surface-hover hover:text-ink"
+      >
+        <i class="fa-solid" [class.fa-moon]="!theme.isDark()" [class.fa-sun]="theme.isDark()"></i>
+      </button>
+
+      <div class="relative" #account>
+        <button
+          type="button"
+          (click)="toggleMenu()"
+          title="Conta"
+          aria-label="Conta"
+          aria-haspopup="menu"
+          [attr.aria-expanded]="menuOpen()"
+          class="flex cursor-pointer items-center gap-1.5 rounded-input border border-line bg-surface py-1 pr-2 pl-1 hover:bg-surface-hover"
+        >
+          <span
+            class="grid size-6 flex-none place-items-center rounded-full bg-linear-[135deg] from-av-amber-from to-av-amber-to text-[10.5px] font-semibold text-surface"
+          >
+            {{ users.initials() }}
+          </span>
+          <i class="fa-solid fa-chevron-down text-[9px] text-tertiary"></i>
+        </button>
+
+        @if (menuOpen()) {
+          <div
+            role="menu"
+            class="absolute top-[calc(100%+6px)] right-0 z-20 w-56 overflow-hidden rounded-pop border border-line bg-surface shadow-pop"
+          >
+            <div class="flex flex-col gap-0.5 border-b border-line-subtle px-3 py-2.5">
+              <span class="truncate text-[12.5px] font-semibold text-ink">{{ users.name() }}</span>
+              <span class="truncate text-[11.5px] text-muted">{{ users.email() }}</span>
+            </div>
+
+            <button
+              type="button"
+              role="menuitem"
+              (click)="signOut()"
+              class="flex w-full cursor-pointer items-center gap-2 px-3 py-2.5 text-left text-[12.5px] font-medium text-tertiary hover:bg-danger-soft hover:text-danger"
+            >
+              <i class="fa-solid fa-right-from-bracket text-[12px]"></i>
+              Sair
+            </button>
+          </div>
+        }
+      </div>
+    </div>
   </div>
-</aside>
+</header>

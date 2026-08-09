@@ -1,0 +1,69 @@
+<main class="grid min-h-dvh place-items-center px-4 py-10">
+  <section
+    class="flex w-full max-w-[380px] flex-col gap-6 rounded-panel border border-line bg-surface p-7 shadow-rail"
+  >
+    <header class="flex flex-col gap-1.5">
+      <span
+        class="mb-1 grid size-9 place-items-center rounded-control bg-linear-[135deg] from-accent to-coral"
+      >
+        <i class="fa-solid fa-list-check text-[16px] text-surface"></i>
+      </span>
+      <h1 class="text-[19px] leading-tight font-semibold text-ink">Entrar</h1>
+      <p class="text-[13px] text-muted">Acesse a sua lista de tarefas.</p>
+    </header>
+
+    @if (failure(); as message) {
+      <p
+        role="alert"
+        class="rounded-input border border-danger-line bg-danger-soft px-3 py-2 text-[12.5px] text-danger"
+      >
+        {{ message }}
+      </p>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-4">
+      <label class="flex flex-col gap-1.5">
+        <span class="text-[12.5px] font-medium text-secondary">E-mail</span>
+        <input
+          type="email"
+          formControlName="email"
+          autocomplete="email"
+          placeholder="voce@exemplo.com"
+          class="rounded-input border border-line-strong bg-surface px-3 py-2 text-[13.5px] text-ink placeholder:text-faint hover:border-ink-hover"
+        />
+        @if (showError('email')) {
+          <span class="text-[11.5px] text-danger">Informe um e-mail válido.</span>
+        }
+      </label>
+
+      <label class="flex flex-col gap-1.5">
+        <span class="text-[12.5px] font-medium text-secondary">Senha</span>
+        <input
+          type="password"
+          formControlName="password"
+          autocomplete="current-password"
+          placeholder="••••••••"
+          class="rounded-input border border-line-strong bg-surface px-3 py-2 text-[13.5px] text-ink placeholder:text-faint hover:border-ink-hover"
+        />
+        @if (showError('password')) {
+          <span class="text-[11.5px] text-danger">A senha tem no mínimo 8 caracteres.</span>
+        }
+      </label>
+
+      <button
+        type="submit"
+        [disabled]="submitting()"
+        class="mt-1 cursor-pointer rounded-btn bg-ink px-4 py-2.5 text-[13.5px] font-semibold text-surface hover:bg-ink-hover disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        {{ submitting() ? 'Entrando…' : 'Entrar' }}
+      </button>
+    </form>
+
+    <p class="text-center text-[12.5px] text-muted">
+      Ainda não tem conta?
+      <a routerLink="/register" class="font-semibold text-ink underline-offset-2 hover:underline">
+        Criar conta
+      </a>
+    </p>
+  </section>
+</main>

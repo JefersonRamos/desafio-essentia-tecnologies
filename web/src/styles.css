@@ -81,6 +81,36 @@
   }
 }
 
+/* -- Tema escuro --------------------------------------------------------- */
+:root[data-theme='dark'] {
+  --color-canvas: #141311;
+  --color-surface: #1c1b19;
+  --color-surface-subtle: #201f1c;
+  --color-surface-hover: #2a2825;
+  --color-surface-pill: #2a2825;
+
+  --color-line: #302e2a;
+  --color-line-subtle: #262421;
+  --color-line-strong: #413e39;
+
+  --color-ink: #f4f2ee;
+  --color-ink-hover: #dedbd5;
+  --color-strong: #cfccc5;
+  --color-secondary: #b4b0a8;
+  --color-tertiary: #928e86;
+  --color-muted: #7c7871;
+  --color-faint: #5e5b55;
+
+  --color-danger: #ff6369;
+  --color-danger-soft: #331d1e;
+  --color-danger-line: #4d2b2d;
+  --color-violet: #a86fd8;
+  --color-violet-soft: #2b2135;
+  --color-success: #45b87e;
+  --color-success-soft: #17301f;
+  --color-highlight: #4a3018;
+}
+
 @layer base {
   html,
   body {
