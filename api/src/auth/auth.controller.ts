@@ -1,17 +1,21 @@
 import type { Request, Response } from 'express';
 import { HttpError } from '../http/http-error.js';
+import type { CreateUserInput } from '../users/user.schema.js';
 import { authenticated, currentToken } from './auth.middleware.js';
 import * as auth from './auth.service.js';
+
+type WithBody<T> = Request<Record<string, string>, unknown, T>;
 
 interface LoginBody {
   email?: unknown;
   password?: unknown;
 }
 
-export async function login(
-  req: Request<Record<string, string>, unknown, LoginBody>,
-  res: Response,
-): Promise<void> {
+export async function register(req: WithBody<CreateUserInput>, res: Response): Promise<void> {
+  res.status(201).json(await auth.register(req.body));
+}
+
+export async function login(req: WithBody<LoginBody>, res: Response): Promise<void> {
   const { email, password } = req.body ?? {};
 
   if (typeof email !== 'string' || typeof password !== 'string' || !email || !password) {
