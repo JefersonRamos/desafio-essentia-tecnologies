@@ -48,7 +48,7 @@
       @for (task of store.tasks(); track task.id) {
         <app-task-card
           [task]="task"
-          (toggle)="store.toggle(task)"
+          (toggle)="toggle(task)"
           (remove)="remove(task)"
           (save)="save(task, $event)"
         />

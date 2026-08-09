@@ -38,6 +38,14 @@ export class Board {
     this.form.reset();
   }
 
+  protected toggle(task: Task): void {
+    this.store.toggle(task);
+
+    this.toasts.show(task.done ? 'Tarefa reaberta' : 'Tarefa concluída', {
+      action: { label: 'Desfazer', run: () => this.store.update(task.id, { done: task.done }) },
+    });
+  }
+
   protected async save(task: Task, changes: TaskChanges): Promise<void> {
     const confirmed = await this.confirm.ask({
       title: 'Salvar alterações',

@@ -63,6 +63,13 @@
         <span class="text-xs whitespace-pre-line text-muted">{{ task().description }}</span>
       }
     </div>
+
+    <span
+      [class]="task().done ? 'bg-success-soft text-success' : 'bg-surface-pill text-strong'"
+      class="ml-auto flex-none rounded-tag px-2 py-0.5 text-[11px] font-semibold"
+    >
+      {{ task().done ? 'Concluída' : 'Pendente' }}
+    </span>
   </div>
 
   <div class="flex items-center gap-2 border-t border-line-subtle pt-[9px]">
