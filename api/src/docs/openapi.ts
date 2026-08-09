@@ -8,8 +8,8 @@ export const openapiDocument = {
   servers: [{ url: '/api', description: 'Através do nginx' }],
   tags: [
     { name: 'Sistema', description: 'Estado do serviço' },
-    { name: 'Autenticação', description: 'Login e sessão' },
-    { name: 'Usuários', description: 'Cadastro e gestão da própria conta' },
+    { name: 'Autenticação', description: 'Cadastro, login e sessão' },
+    { name: 'Usuários', description: 'Gestão da própria conta' },
   ],
   components: {
     securitySchemes: {
@@ -37,7 +37,7 @@ export const openapiDocument = {
           password: { type: 'string', format: 'password', example: 'senha123' },
         },
       },
-      LoginResponse: {
+      SessionResponse: {
         type: 'object',
         required: ['token', 'user'],
         properties: {
@@ -45,7 +45,7 @@ export const openapiDocument = {
           user: { $ref: '#/components/schemas/User' },
         },
       },
-      CreateUserRequest: {
+      RegisterRequest: {
         type: 'object',
         required: ['name', 'email', 'password'],
         properties: {
@@ -140,6 +140,28 @@ export const openapiDocument = {
         },
       },
     },
+    '/auth/register': {
+      post: {
+        tags: ['Autenticação'],
+        summary: 'Cadastra e já devolve a sessão',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': { schema: { $ref: '#/components/schemas/RegisterRequest' } },
+          },
+        },
+        responses: {
+          201: {
+            description: 'Usuário criado e autenticado',
+            content: {
+              'application/json': { schema: { $ref: '#/components/schemas/SessionResponse' } },
+            },
+          },
+          400: { $ref: '#/components/responses/BadRequest' },
+          409: { $ref: '#/components/responses/EmailConflict' },
+        },
+      },
+    },
     '/auth/login': {
       post: {
         tags: ['Autenticação'],
@@ -154,7 +176,7 @@ export const openapiDocument = {
           200: {
             description: 'Autenticado',
             content: {
-              'application/json': { schema: { $ref: '#/components/schemas/LoginResponse' } },
+              'application/json': { schema: { $ref: '#/components/schemas/SessionResponse' } },
             },
           },
           400: { $ref: '#/components/responses/BadRequest' },
@@ -186,25 +208,16 @@ export const openapiDocument = {
         },
       },
     },
-    '/users': {
+    '/auth/logout': {
       post: {
-        tags: ['Usuários'],
-        summary: 'Cadastra um usuário',
-        requestBody: {
-          required: true,
-          content: {
-            'application/json': { schema: { $ref: '#/components/schemas/CreateUserRequest' } },
-          },
-        },
+        tags: ['Autenticação'],
+        summary: 'Revoga o token atual',
+        description:
+          'Grava o jti do token na denylist até o exp original. O token continua com assinatura válida, mas passa a ser recusado.',
+        security: [{ bearerAuth: [] }],
         responses: {
-          201: {
-            description: 'Usuário criado',
-            content: {
-              'application/json': { schema: { $ref: '#/components/schemas/UserResponse' } },
-            },
-          },
-          400: { $ref: '#/components/responses/BadRequest' },
-          409: { $ref: '#/components/responses/EmailConflict' },
+          204: { description: 'Token revogado' },
+          401: { $ref: '#/components/responses/Unauthorized' },
         },
       },
     },

@@ -4,6 +4,7 @@ export const ptBR = {
     invalidCredentials: 'Credenciais inválidas',
     tokenMissing: 'Token ausente',
     tokenInvalid: 'Token inválido',
+    tokenRevoked: 'Token revogado',
   },
   users: {
     emailTaken: 'E-mail já cadastrado',
@@ -17,3 +18,7 @@ export const ptBR = {
     validationError: 'Dados inválidos',
   },
 } as const;
+
+export type Messages = {
+  [Group in keyof typeof ptBR]: Record<keyof (typeof ptBR)[Group], string>;
+};
