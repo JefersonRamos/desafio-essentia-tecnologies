@@ -19,6 +19,7 @@ npm-debug.log*
 # editores
 .idea/
 .vscode/
+.obsidian/
 
 # sistema
 .DS_Store
