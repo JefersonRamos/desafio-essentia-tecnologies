@@ -12,12 +12,14 @@
     <input
       formControlName="title"
       aria-label="Nova tarefa"
-      placeholder="O que precisa ser feito?"
+      placeholder="Escreva e tecle Enter para criar"
       class="min-w-0 flex-1 rounded-input border border-line-strong bg-surface px-3 py-2 text-[13.5px] text-ink placeholder:text-faint hover:border-ink-hover"
     />
 
     <button
-      type="submit"
+      type="button"
+      (click)="compose()"
+      title="Abrir o formulário completo"
       class="flex flex-none cursor-pointer items-center gap-1.5 rounded-group bg-ink px-3.5 py-2 text-[13px] font-semibold text-surface hover:bg-ink-hover"
     >
       <i class="fa-solid fa-plus text-[11px]"></i>

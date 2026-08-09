@@ -1,0 +1,65 @@
+<dialog
+  #element
+  (close)="close()"
+  aria-labelledby="task-dialog-title"
+  class="m-auto w-[min(92vw,440px)] rounded-pop border border-line bg-surface p-0 text-ink shadow-pop backdrop:bg-ink/40"
+>
+  @if (dialog.current(); as current) {
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="flex flex-col gap-1 px-5 pt-5">
+        <h2 id="task-dialog-title" class="text-[15px] leading-tight font-semibold text-ink">
+          {{ current.task ? 'Editar tarefa' : 'Nova tarefa' }}
+        </h2>
+        <p class="text-[12.5px] text-muted">
+          {{
+            current.task
+              ? 'Ajuste o título e detalhe o que precisa ser feito.'
+              : 'Dê um título e, se quiser, uma descrição.'
+          }}
+        </p>
+      </div>
+
+      <div class="flex flex-col gap-4 px-5 py-5">
+        <label class="flex flex-col gap-1.5">
+          <span class="text-[12.5px] font-medium text-secondary">Título</span>
+          <input
+            formControlName="title"
+            autofocus
+            placeholder="O que precisa ser feito?"
+            class="rounded-input border border-line-strong bg-surface px-3 py-2 text-[13.5px] text-ink placeholder:text-faint hover:border-ink-hover"
+          />
+          @if (form.controls.title.invalid && form.controls.title.touched) {
+            <span class="text-[11.5px] text-danger">O título é obrigatório.</span>
+          }
+        </label>
+
+        <label class="flex flex-col gap-1.5">
+          <span class="text-[12.5px] font-medium text-secondary">Descrição</span>
+          <textarea
+            formControlName="description"
+            rows="3"
+            placeholder="Detalhes opcionais"
+            class="resize-y rounded-input border border-line-strong bg-surface px-3 py-2 text-[13px] text-secondary placeholder:text-faint hover:border-ink-hover"
+          ></textarea>
+        </label>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 border-t border-line-subtle px-5 py-3">
+        <button
+          type="button"
+          (click)="close()"
+          class="cursor-pointer rounded-input border border-line bg-surface px-3 py-1.5 text-[12.5px] font-medium text-tertiary hover:bg-surface-hover hover:text-ink"
+        >
+          {{ current.task ? 'Fechar' : 'Cancelar' }}
+        </button>
+
+        <button
+          type="submit"
+          class="cursor-pointer rounded-input bg-ink px-3 py-1.5 text-[12.5px] font-semibold text-surface hover:bg-ink-hover"
+        >
+          {{ current.task ? 'Salvar' : 'Criar tarefa' }}
+        </button>
+      </div>
+    </form>
+  }
+</dialog>

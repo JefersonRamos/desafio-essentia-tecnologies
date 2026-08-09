@@ -3,6 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ConfirmService } from '../confirm-dialog/confirm-service';
 import { Navigation } from '../navigation/navigation';
 import { TaskCard } from '../task-card/task-card';
+import { TaskDialogService } from '../task-dialog/task-dialog-service';
 import { ToastService } from '../toast-host/toast-service';
 import type { Task, TaskChanges } from '../tasks/task.model';
 import { TaskStore } from '../tasks/task-store';
@@ -15,6 +16,7 @@ import { TaskStore } from '../tasks/task-store';
 export class Board {
   private readonly confirm = inject(ConfirmService);
   private readonly toasts = inject(ToastService);
+  private readonly dialog = inject(TaskDialogService);
 
   protected readonly store = inject(TaskStore);
 
@@ -34,7 +36,12 @@ export class Board {
       return;
     }
 
-    this.store.create({ title });
+    this.store.create({ title }, (created) => this.dialog.refine(created));
+    this.form.reset();
+  }
+
+  protected compose(): void {
+    this.dialog.create(this.form.getRawValue().title.trim());
     this.form.reset();
   }
 

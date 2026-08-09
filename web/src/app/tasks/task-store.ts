@@ -95,10 +95,12 @@ export const TaskStore = signalStore(
         });
       },
 
-      create(task: NewTask): void {
+      create(task: NewTask, onCreated?: (created: Task) => void): void {
         service.create(task).subscribe({
-          next: (created) =>
-            patchState(store, { tasks: ordered([created, ...store.tasks()]), failure: null }),
+          next: (created) => {
+            patchState(store, { tasks: ordered([created, ...store.tasks()]), failure: null });
+            onCreated?.(created);
+          },
           error: (response: HttpErrorResponse) =>
             fail(response, 'Não foi possível criar a tarefa.'),
         });
