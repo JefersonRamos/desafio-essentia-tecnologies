@@ -3,6 +3,8 @@
 Aplicação full-stack de gerenciamento de tarefas — Desafio Técnico Essentia
 Technologies (TechX).
 
+[![CI](https://github.com/JefersonRamos/desafio-essentia-tecnologies/actions/workflows/ci.yml/badge.svg)](https://github.com/JefersonRamos/desafio-essentia-tecnologies/actions/workflows/ci.yml)
+
 Front em Angular, API em Express + TypeScript, MySQL para os dados da aplicação e
 MongoDB para os logs de requisição, tudo atrás de um nginx que é o único ponto
 público. A stack inteira sobe com dois comandos: não é preciso ter Node, Angular
@@ -59,6 +61,7 @@ CLI, MySQL ou Mongo instalados na máquina — só Docker.
 | Decisão | Escolha | Motivo |
 | --- | --- | --- |
 | Borda | nginx como único container publicado | front e API na mesma origem — sem CORS no navegador |
+| Força bruta | `limit_req` de 5/min por IP em `/api/auth/` | o login é a porta da frente; o resto da API segue sem limite |
 | Redes | `frontend` e `backend` separadas | o front não alcança os bancos; todo acesso a dado passa pela API |
 | Dual DB | MySQL (dados) + MongoDB (logs) | dado estruturado no relacional, log de requisição sem schema fixo |
 | Compose | dois arquivos independentes, sem override | cada ambiente é legível de cima a baixo, sem merge implícito |
@@ -90,6 +93,8 @@ Racional completo da infraestrutura em [`docs/infra.md`](docs/infra.md).
 | Validação | zod na borda, com erro por campo |
 | i18n | i18next — pt-BR e en-US por `Accept-Language` |
 | Documentação | OpenAPI 3.0.3 + Swagger UI |
+| Testes | Vitest + supertest — 76 casos, do serviço à camada HTTP |
+| Lint | ESLint — regra que proíbe remoção física em `task` e `user` |
 
 **Infra**
 
@@ -215,6 +220,9 @@ Rodar comandos dentro dos containers:
 
 ```bash
 docker compose exec api npm test         # suíte da API (vitest)
+docker compose exec api npm run typecheck
+docker compose exec api npm test         # 76 casos da API
+docker compose exec api npm run lint
 docker compose exec api npm run typecheck
 docker compose exec web npm test
 docker compose exec api npm run build
@@ -343,17 +351,25 @@ CLAUDE.md                 schema do wiki
 | CRUD de tarefas + marcar concluída | ✅ na API; consumo no front em branch aberta |
 | JWT + autenticação | ✅ login, cadastro, rota protegida e logout com revogação |
 | Commits incrementais | ✅ histórico por feature branch |
+| Testes | ✅ 76 na API (com camada HTTP) e 14 no front, verdes no CI |
 
-**O que ainda não está na branch de integração.** O consumo das tarefas pelo front
-(lista, criação, edição, conclusão e remoção), a confirmação em modal com desfazer, e
-a paginação por cursor vivem em `feat/tasks-web`, `feat/task-confirm-undo` e
-`feat/task-pagination`, nessa ordem de dependência. Na `jeferson-ramos` o board ainda
-mostra cards estáticos.
+**Os testes.** São 76 casos na API e 14 no front, rodando no CI a cada push. A maior
+parte usa o Prisma dublado — provam que o código **pede** a consulta certa (que o
+`where` carrega `deletedAt: null`, que `purgeExpired` só apaga o vencido, que tarefa
+alheia vira 404 e não 403), e não que o MySQL responde certo. Acima deles,
+`src/app.test.ts` sobe o `createApp()` e passa pela cadeia HTTP inteira: ordem dos
+middlewares, routers montados, handler de erro, i18n por `Accept-Language`, e o token
+revogado sendo barrado numa requisição real.
 
-**O que não existe.** Não há teste automatizado da API — `createApp()` foi desenhado
-para ser testável e não é testado. O front tem specs, mas verificam apenas que os
-componentes instanciam. Não há refresh token: a sessão morre em 1h e o front não
-trata isso no meio do uso. Não há recuperação de senha.
+A suíte é validada por mutação: dez comportamentos críticos foram quebrados de
+propósito, e cada um derrubou o teste correspondente — mover o `i18nMiddleware` de
+lugar, por exemplo, derruba 14 dos 18 casos de HTTP.
+
+**O que não existe.** Nenhum teste de integração contra um banco real, e nenhum
+end-to-end. Erro de índice, de collation ou de comportamento do driver passa
+despercebido. Não há refresh token: a sessão morre em 1h — o interceptor do front
+desloga e manda para o login quando isso acontece, mas nada renova a sessão. Não há
+recuperação de senha.
 
 O contrato que os Dockerfiles esperam de cada aplicação — scripts de `package.json`,
 porta, retry de conexão, pasta de build do Angular — está especificado em

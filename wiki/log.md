@@ -62,3 +62,20 @@ com pino foi implementado e desfeito por inteiro. Corrigidos oito SHAs de proven
 que a reescrita de histórico do dia tinha matado — remapeados por assunto de commit.
 Três branches de front e API seguem fora da branch de integração, e as páginas dizem
 isso.
+
+## [2026-08-09] ingest | Testes de HTTP, CI e rate limit
+
+Suíte da API foi de 51 para 76 casos, com `app.test.ts` exercitando o `createApp()`
+inteiro — ordem de middleware, routers nos paths certos, handler de erro no fim, e o
+caso que faltava: a denylist barrando uma requisição real depois do logout. Quatro
+mutações confirmaram que a suíte acusa (mover o i18n derruba 14 dos 18).
+
+Achado: a `main` estava com 3 testes quebrados. `feat/api-testes` e
+`feat/task-pagination` mudaram `listByUser` em paralelo e foram mergeadas separadas —
+ninguém percebeu porque não havia CI. Agora há, e a paginação ganhou os testes que
+nunca teve.
+
+Registrada em `api-token-denylist` a decisão das duas idas ao banco por requisição
+autenticada, com o que ela compra, o que custa e as saídas conhecidas. Rate limit de
+5r/m em `/api/auth/` no nginx fecha a força bruta no login. O teste tautológico do
+repo virou regra de lint, que vale sobre o código de produção.

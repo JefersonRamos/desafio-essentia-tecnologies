@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main, jeferson-ramos]
+  pull_request:
+
+jobs:
+  api:
+    name: API — lint, typecheck e testes
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
+    env:
+      # o env.ts falha no import sem estas; nenhum teste abre conexão
+      JWT_SECRET: ci_secret_nao_usado_em_producao
+      DATABASE_URL: mysql://techx:techx@localhost:3306/techx
+      MONGO_URL: mongodb://localhost:27017
+      LOG_LEVEL: silent
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: api/package-lock.json
+
+      - run: npm ci
+
+      # src/generated/prisma não é versionado
+      - run: npx prisma generate
+
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+
+  web:
+    name: Front — testes e build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # web/ ainda não tem package-lock.json, então npm ci não se aplica
+      - run: npm install --no-audit --no-fund
+
+      - run: npm test
+      - run: npm run build

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { HttpError } from '../http/http-error.js';
 
 vi.mock('./task.repo.js', () => ({
-  listByUser: vi.fn(),
+  listByUser: vi.fn(() => Promise.resolve([])),
   findOwned: vi.fn(),
   create: vi.fn(),
   update: vi.fn(),
@@ -37,6 +37,55 @@ describe('task.service', () => {
     repo.create.mockResolvedValue(tarefa);
     repo.update.mockResolvedValue(tarefa);
     repo.softDelete.mockResolvedValue(undefined);
+  });
+
+  describe('list', () => {
+    const pagina = (n: number): typeof tarefa[] =>
+      Array.from({ length: n }, (_, i) => ({ ...tarefa, id: `tarefa-${i}` }));
+
+    it('anuncia a próxima página quando veio item além do limite', async () => {
+      repo.listByUser.mockResolvedValue(pagina(4));
+
+      const { tasks, nextCursor } = await service.list(OWNER, { limit: 3 });
+
+      expect(tasks).toHaveLength(3);
+      expect(nextCursor).toBe('tarefa-2');
+    });
+
+    it('devolve nextCursor null quando a lista acabou', async () => {
+      repo.listByUser.mockResolvedValue(pagina(2));
+
+      const { tasks, nextCursor } = await service.list(OWNER, { limit: 3 });
+
+      expect(tasks).toHaveLength(2);
+      expect(nextCursor).toBeNull();
+    });
+
+    it('recusa cursor que não pertence ao usuário', async () => {
+      repo.findOwned.mockResolvedValue(null);
+
+      const erro = await service
+        .list(OWNER, { limit: 20, cursor: TASK })
+        .catch((e: unknown) => e);
+
+      expect(erro).toBeInstanceOf(HttpError);
+      expect((erro as HttpError).status).toBe(400);
+      expect((erro as HttpError).key).toBe('tasks.invalidCursor');
+    });
+
+    it('nem consulta a listagem quando o cursor é inválido', async () => {
+      repo.findOwned.mockResolvedValue(null);
+
+      await service.list(OWNER, { limit: 20, cursor: TASK }).catch(() => undefined);
+
+      expect(repo.listByUser).not.toHaveBeenCalled();
+    });
+
+    it('não valida cursor quando não veio nenhum', async () => {
+      await service.list(OWNER, { limit: 20 });
+
+      expect(repo.findOwned).not.toHaveBeenCalled();
+    });
   });
 
   describe('findOrFail', () => {
