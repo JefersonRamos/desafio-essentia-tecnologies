@@ -75,8 +75,14 @@ nenhuma parte dentro dele.
 - **O container `web` está em loop de restart** (`ENOENT: /app/package.json`) e a
   stack documentada em [[docs-infra]] não sobe inteira. Nenhuma fonte explica o que
   aconteceu com o código.
-- **`web/.gitignore` deixou o `src/` fora do versionamento** sem que ninguém notasse
-  até a perda. Falta uma fonte sobre a política de versionamento do front.
+- **O front nunca foi versionado, e não por `.gitignore`.** `web/.gitignore` cobre
+  apenas `node_modules/`, `dist/`, `.angular/`, `coverage/` e `.env` — `src/`,
+  `angular.json` e `package.json` nunca foram ignorados, apenas nunca adicionados. O
+  commit `7549e70` levou só os 4 arquivos de infra e o scaffold do Angular, feito
+  depois, ficou untracked até desaparecer. Verificado em 2026-08-08: nem
+  LocalHistory, nem `.angular/cache`, nem sourcemap no build — os componentes são
+  irrecuperáveis. Só a paleta sobrevive, e parcialmente (21 de 34 tokens `--color-*`
+  no CSS compilado, porque o Tailwind v4 emite variável sob demanda).
 - **`deletedAt` existe e não filtra.** [[api-prisma-mysql]] registra a coluna, mas
   nenhum repositório checa `deletedAt is null` e o `@unique` do e-mail trava o
   endereço de um usuário apagado para sempre. Falta decidir a estratégia.
