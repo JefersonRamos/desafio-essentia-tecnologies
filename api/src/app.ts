@@ -5,6 +5,9 @@ import express, {
   type Response,
 } from 'express';
 import swaggerUi from 'swagger-ui-express';
+import { errorCode, fail } from './http/fail.js';
+import { i18nMiddleware } from './i18n/index.js';
+import { logger } from './logging/logger.js';
 import { authRouter } from './auth/auth.routes.js';
 import { openapiDocument } from './docs/openapi.js';
 
@@ -12,6 +15,7 @@ export function createApp(): Express {
   const app = express();
 
   app.use(express.json());
+  app.use(i18nMiddleware);
 
   app.get('/api/health', (_req: Request, res: Response) => {
     res.json({ status: 'ok', uptime: process.uptime() });
@@ -30,12 +34,12 @@ export function createApp(): Express {
   );
 
   app.use((_req: Request, res: Response) => {
-    res.status(404).json({ error: 'rota não encontrada' });
+    fail(res, 404, 'common.notFound');
   });
 
   app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
-    console.error(error);
-    res.status(500).json({ error: 'erro interno' });
+    logger.error({ error, code: errorCode('common.internalError') }, 'erro nao tratado');
+    fail(res, 500, 'common.internalError');
   });
 
   return app;

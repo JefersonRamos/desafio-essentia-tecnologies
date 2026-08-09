@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from 'express';
+import { fail } from '../http/fail.js';
 import { findById } from '../users/user.repo.js';
 import type { User } from '../users/user.model.js';
 import { verifyToken } from './token.js';
@@ -15,7 +16,7 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
   const header = req.header('authorization');
 
   if (!header?.startsWith('Bearer ')) {
-    res.status(401).json({ error: 'token ausente' });
+    fail(res, 401, 'auth.tokenMissing');
     return;
   }
 
@@ -24,13 +25,13 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
     const user = await findById(payload.sub);
 
     if (!user) {
-      res.status(401).json({ error: 'token inválido' });
+      fail(res, 401, 'auth.tokenInvalid');
       return;
     }
 
     req.user = user;
     next();
   } catch {
-    res.status(401).json({ error: 'token inválido' });
+    fail(res, 401, 'auth.tokenInvalid');
   }
 }
