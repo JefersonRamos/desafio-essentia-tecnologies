@@ -9,7 +9,7 @@ retrieved: 2026-08-08
 published: 2026-08-08
 author: Jeff
 medium: código
-commits: [e6e5d8f, 8bd6bbd]
+commits: [1563a79, c7ae849]
 ---
 
 # Autenticação JWT — login, token e middleware
@@ -19,17 +19,20 @@ Quatro arquivos em `api/src/auth/`: `password.ts` (hash), `token.ts` (assinatura
 
 ## Takeaways
 
-**Só access token.** Não há refresh token, não há sessão no servidor, não há
-blacklist. Consequência aceita conscientemente: **não existe logout do lado do
-servidor** — um token roubado vale até expirar. Por isso a expiração é curta.
+**Só access token, sem refresh.** A sessão morre em 1h e não se renova. Esta página
+registrava também que não havia sessão no servidor nem blacklist, e que por isso
+**não existia logout** — isso deixou de valer em 2026-08-09, quando
+[[api-token-denylist]] introduziu a revogação por `jti`. O que permanece é a ausência
+de refresh token.
 
 **Bearer no header, não cookie.** Sem cookie não há CSRF; em troca, o token fica
 onde o front puser (memória, `localStorage`) e o XSS passa a ser o vetor.
 
 **O middleware bate no banco a cada requisição.** `requireAuth` decodifica o token e
 ainda chama `findById`. Isso custa uma query por request e paga por dois cenários:
-usuário apagado com token válido, e dados frescos em `req.user`. É a única forma de
-revogação que existe aqui — apagar o usuário invalida o token na hora.
+usuário apagado com token válido, e dados frescos em `req.user`. Era a única forma de
+revogação que existia aqui; hoje divide o papel com a denylist de
+[[api-token-denylist]], que acrescenta uma segunda query por requisição.
 
 **Resposta de login é deliberadamente ambígua.** E-mail inexistente e senha errada
 devolvem o mesmo 401 `auth.invalid_credentials`. Impede enumeração de usuários. Está
@@ -94,16 +97,18 @@ O `code` é derivado da chave de tradução por regex (`tokenInvalid` →
 Cria [[autenticacao-jwt]] como conceito. Define o contrato de erro que toda rota
 futura herda.
 
-> [!warning] Contradição
-> `api/package.json` declara `zod@4.4.3` como dependência de produção, mas
-> `auth.routes.ts` valida o corpo com `typeof` manual (`auth.routes.ts:17`) e nenhum
-> arquivo importa zod. A decisão "vamos usar zod" foi tomada e não foi implementada.
-> Não resolvido — ou zod entra e substitui a validação manual, ou sai do
-> `package.json`.
+> [!note] Contradição resolvida
+> `api/package.json` declarava `zod@4.4.3` sem nenhum import, enquanto o login
+> validava o corpo com `typeof` manual. Resolvido em `7da9255`: [[api-users-crud]]
+> implementa a validação com zod e `http/validate.ts`. O login continua com a
+> checagem manual, porque aceita corpo de forma tolerante para devolver
+> `auth.credentials_required` — é a única rota que não passa por schema.
 
 ## Em aberto
 
-- Sem refresh token, a sessão morre em 1h sem aviso. O front ainda não trata 401.
+- Sem refresh token, a sessão morre em 1h sem aviso. O front ainda não trata 401 no
+  meio do uso ([[web-auth-sessao]]).
 - Sem rate limit no login. Bcrypt de 12 rounds é caro, então o endpoint é um alvo de
   exaustão de CPU.
-- Nenhuma rota de registro, troca ou recuperação de senha — só o seed cria usuário.
+- Não há troca esquecida nem recuperação de senha. Cadastro e alteração existem desde
+  [[api-users-crud]] e [[api-token-denylist]].

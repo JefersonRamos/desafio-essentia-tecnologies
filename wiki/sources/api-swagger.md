@@ -9,7 +9,7 @@ retrieved: 2026-08-08
 published: 2026-08-08
 author: Jeff
 medium: código
-commits: [6b93de1]
+commits: [585f56a]
 ---
 
 # Documentação OpenAPI escrita à mão
