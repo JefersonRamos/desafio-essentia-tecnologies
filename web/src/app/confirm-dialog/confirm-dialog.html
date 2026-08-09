@@ -1,0 +1,39 @@
+<dialog
+  #dialog
+  (close)="answer(false)"
+  aria-labelledby="confirm-title"
+  class="m-auto w-[min(92vw,380px)] rounded-pop border border-line bg-surface p-0 text-ink shadow-pop backdrop:bg-ink/40"
+>
+  @if (confirm.request(); as request) {
+    <div class="flex flex-col gap-1.5 px-5 pt-5">
+      <h2 id="confirm-title" class="text-[15px] leading-tight font-semibold text-ink">
+        {{ request.title }}
+      </h2>
+      <p class="text-[12.5px] leading-relaxed text-muted">{{ request.message }}</p>
+    </div>
+
+    <div class="mt-5 flex items-center justify-end gap-2 border-t border-line-subtle px-5 py-3">
+      <button
+        type="button"
+        (click)="answer(false)"
+        class="cursor-pointer rounded-input border border-line bg-surface px-3 py-1.5 text-[12.5px] font-medium text-tertiary hover:bg-surface-hover hover:text-ink"
+      >
+        Cancelar
+      </button>
+
+      <button
+        type="button"
+        (click)="answer(true)"
+        autofocus
+        [class]="
+          request.danger
+            ? 'bg-danger text-surface hover:opacity-90'
+            : 'bg-ink text-surface hover:bg-ink-hover'
+        "
+        class="cursor-pointer rounded-input px-3 py-1.5 text-[12.5px] font-semibold"
+      >
+        {{ request.action }}
+      </button>
+    </div>
+  }
+</dialog>

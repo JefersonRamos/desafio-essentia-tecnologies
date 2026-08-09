@@ -1,7 +1,71 @@
 <app-navigation />
 
-<main class="mx-auto flex w-full max-w-[1040px] flex-col gap-3 px-4 py-6">
-  @for (tasks of [1, 2]; track tasks) {
-    <app-task-card />
+<main class="mx-auto flex w-full max-w-[720px] flex-col gap-4 px-4 py-7">
+  <header class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+    <h1 class="text-[19px] leading-tight font-semibold text-ink">Minhas tarefas</h1>
+    <p class="text-[12.5px] text-muted">
+      {{ store.pending() }} pendente(s) · {{ store.completed() }} concluída(s)
+    </p>
+  </header>
+
+  <form [formGroup]="form" (ngSubmit)="add()" class="flex items-center gap-2">
+    <input
+      formControlName="title"
+      aria-label="Nova tarefa"
+      placeholder="Escreva e tecle Enter para criar"
+      class="min-w-0 flex-1 rounded-input border border-line-strong bg-surface px-3 py-2 text-[13.5px] text-ink placeholder:text-faint hover:border-ink-hover"
+    />
+
+    <button
+      type="button"
+      (click)="compose()"
+      title="Abrir o formulário completo"
+      class="flex flex-none cursor-pointer items-center gap-1.5 rounded-group bg-ink px-3.5 py-2 text-[13px] font-semibold text-surface hover:bg-ink-hover"
+    >
+      <i class="fa-solid fa-plus text-[11px]"></i>
+      Nova tarefa
+    </button>
+  </form>
+
+  @if (store.failure(); as message) {
+    <p
+      role="alert"
+      class="rounded-input border border-danger-line bg-danger-soft px-3 py-2 text-[12.5px] text-danger"
+    >
+      {{ message }}
+    </p>
+  }
+
+  @if (store.loading()) {
+    <p class="py-6 text-center text-[12.5px] text-muted">Carregando…</p>
+  } @else if (store.tasks().length === 0) {
+    <div
+      class="flex flex-col items-center gap-1 rounded-panel border border-dashed border-line-strong px-4 py-10"
+    >
+      <span class="text-[13.5px] font-semibold text-secondary">Nenhuma tarefa por aqui</span>
+      <span class="text-[12.5px] text-muted">Escreva a primeira no campo acima.</span>
+    </div>
+  } @else {
+    <div class="flex flex-col gap-2.5">
+      @for (task of store.tasks(); track task.id) {
+        <app-task-card
+          [task]="task"
+          (toggle)="toggle(task)"
+          (remove)="remove(task)"
+          (save)="save(task, $event)"
+        />
+      }
+    </div>
+
+    @if (store.nextCursor()) {
+      <button
+        type="button"
+        (click)="store.loadMore()"
+        [disabled]="store.loadingMore()"
+        class="cursor-pointer self-center rounded-input border border-line bg-surface px-4 py-2 text-[12.5px] font-medium text-secondary hover:bg-surface-hover hover:text-ink disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        {{ store.loadingMore() ? 'Carregando…' : 'Carregar mais' }}
+      </button>
+    }
   }
 </main>

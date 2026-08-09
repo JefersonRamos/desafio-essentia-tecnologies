@@ -1,7 +1,12 @@
 import type { Request, Response } from 'express';
 import { authenticated } from '../auth/auth.middleware.js';
-import { parseParams } from '../http/validate.js';
-import { taskParamsSchema, type CreateTaskInput, type UpdateTaskInput } from './task.schema.js';
+import { parseParams, parseQuery } from '../http/validate.js';
+import {
+  taskParamsSchema,
+  taskQuerySchema,
+  type CreateTaskInput,
+  type UpdateTaskInput,
+} from './task.schema.js';
 import * as tasks from './task.service.js';
 
 type WithBody<T> = Request<Record<string, string>, unknown, T>;
@@ -11,9 +16,10 @@ function taskId(req: Pick<Request, 'params'>): string {
 }
 
 export async function index(req: Request, res: Response): Promise<void> {
-  const list = await tasks.list(authenticated(req).id);
+  const query = parseQuery(taskQuerySchema, req.query);
+  const page = await tasks.list(authenticated(req).id, query);
 
-  res.json({ tasks: list });
+  res.json(page);
 }
 
 export async function store(req: WithBody<CreateTaskInput>, res: Response): Promise<void> {

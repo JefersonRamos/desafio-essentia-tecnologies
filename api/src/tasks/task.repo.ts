@@ -13,11 +13,16 @@ const PUBLIC_FIELDS = {
   updatedAt: true,
 } as const;
 
-export async function listByUser(userId: UserId): Promise<Task[]> {
+export async function listByUser(
+  userId: UserId,
+  page: { limit: number; cursor?: TaskId },
+): Promise<Task[]> {
   return prisma.task.findMany({
     where: { userId, ...ACTIVE },
-    orderBy: [{ done: 'asc' }, { createdAt: 'desc' }],
+    orderBy: [{ done: 'asc' }, { createdAt: 'desc' }, { id: 'desc' }],
     select: PUBLIC_FIELDS,
+    take: page.limit + 1,
+    ...(page.cursor ? { cursor: { id: page.cursor }, skip: 1 } : {}),
   });
 }
 

@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { catchError, map, of, tap, type Observable } from 'rxjs';
+import { TaskStore } from '../tasks/task-store';
 import { UserStore } from '../user/user-store';
 import type { Credentials, Registration, Session } from './auth.model';
 import { clearSession, writeSession } from './session-storage';
@@ -9,6 +10,7 @@ import { clearSession, writeSession } from './session-storage';
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly users = inject(UserStore);
+  private readonly tasks = inject(TaskStore);
 
   login(credentials: Credentials): Observable<Session> {
     return this.http
@@ -38,5 +40,6 @@ export class AuthService {
   private clear(): void {
     clearSession();
     this.users.signOut();
+    this.tasks.reset();
   }
 }

@@ -14,6 +14,7 @@ export const ptBR = {
   },
   tasks: {
     notFound: 'Tarefa não encontrada',
+    invalidCursor: 'Cursor inválido ou expirado — recomece a listagem',
   },
   common: {
     notFound: 'Rota não encontrada',

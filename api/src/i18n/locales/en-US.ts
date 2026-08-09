@@ -16,6 +16,7 @@ export const enUS: Messages = {
   },
   tasks: {
     notFound: 'Task not found',
+    invalidCursor: 'Invalid or expired cursor — start the listing over',
   },
   common: {
     notFound: 'Route not found',

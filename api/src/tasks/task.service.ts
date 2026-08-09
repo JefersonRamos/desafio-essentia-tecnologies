@@ -1,9 +1,9 @@
 import { HttpError } from '../http/http-error.js';
 import { taskAudit } from '../logging/audit.js';
 import type { UserId } from '../users/user.model.js';
-import type { Task, TaskId } from './task.model.js';
+import type { Task, TaskId, TaskPage } from './task.model.js';
 import * as repo from './task.repo.js';
-import type { CreateTaskInput, UpdateTaskInput } from './task.schema.js';
+import type { CreateTaskInput, TaskQuery, UpdateTaskInput } from './task.schema.js';
 
 interface TaskChanges {
   title?: string;
@@ -11,8 +11,16 @@ interface TaskChanges {
   done?: boolean;
 }
 
-export async function list(userId: UserId): Promise<Task[]> {
-  return repo.listByUser(userId);
+export async function list(userId: UserId, query: TaskQuery): Promise<TaskPage> {
+  if (query.cursor && !(await repo.findOwned(query.cursor, userId))) {
+    throw new HttpError(400, 'tasks.invalidCursor');
+  }
+
+  const found = await repo.listByUser(userId, query);
+  const tasks = found.slice(0, query.limit);
+  const hasMore = found.length > query.limit;
+
+  return { tasks, nextCursor: hasMore ? (tasks.at(-1)?.id ?? null) : null };
 }
 
 export async function findOrFail(id: TaskId, userId: UserId): Promise<Task> {
