@@ -15,8 +15,8 @@ CLI, MySQL ou Mongo instalados na máquina — só Docker.
 | API (local) | <http://localhost:8080/api> |
 | Health do proxy | <http://localhost:8080/nginx-health> |
 
-> **Status:** a infraestrutura Docker está completa e a stack sobe inteira. O front
-> Angular está em andamento e a API ainda não tem código — veja
+> **Status:** a stack sobe inteira, a API tem autenticação JWT e CRUD de usuários e
+> tarefas, e o front tem login, cadastro e sessão. Veja
 > [Estado da entrega](#estado-da-entrega). Este README documenta o que existe hoje;
 > nada aqui descreve funcionalidade que ainda não foi escrita.
 
@@ -25,6 +25,7 @@ CLI, MySQL ou Mongo instalados na máquina — só Docker.
 - [Arquitetura](#arquitetura)
 - [Tecnologias](#tecnologias)
 - [Quick Start](#quick-start)
+- [A API](#a-api)
 - [Desenvolvimento](#desenvolvimento)
 - [Produção](#produção)
 - [Docker](#docker)
@@ -85,7 +86,11 @@ Racional completo da infraestrutura em [`docs/infra.md`](docs/infra.md).
 | API | Express |
 | SQL | MySQL 8.4 + Prisma |
 | NoSQL | MongoDB 8 (logs de requisição) |
-| Auth | JWT (`JWT_SECRET` / `JWT_EXPIRES_IN` já previstos no `.env`) |
+| Auth | JWT com bcrypt 12 rounds e revogação por `jti` no banco |
+| Validação | zod na borda, com erro por campo |
+| i18n | i18next — pt-BR e en-US por `Accept-Language` |
+| Documentação | OpenAPI 3.0.3 + Swagger UI |
+| Testes | Vitest — unitários, com Prisma dublado |
 
 **Infra**
 
@@ -149,6 +154,49 @@ curl http://localhost:8080/nginx-health  # responde: ok
 Abra <http://localhost:8080>. A API responde em <http://localhost:8080/api>, no mesmo
 host e origem do front.
 
+### 5. Crie uma conta
+
+A aplicação abre na tela de login. Use **Criar conta** para se cadastrar — o cadastro
+já devolve a sessão e cai direto na lista de tarefas. Não é preciso rodar seed.
+
+## A API
+
+Documentação interativa em <http://localhost:8080/api/docs> (Swagger UI) e o
+documento cru em <http://localhost:8080/api/openapi.json>.
+
+| Rota | O que faz |
+| --- | --- |
+| `POST /api/auth/register` | Cadastra e já devolve `{ token, user }` |
+| `POST /api/auth/login` | Autentica e devolve `{ token, user }` |
+| `GET /api/auth/me` | Usuário do token atual |
+| `POST /api/auth/logout` | Revoga o token na denylist do banco |
+| `GET /api/users/:id` | Consulta a própria conta |
+| `PATCH /api/users/:id` | Atualiza nome, e-mail ou senha |
+| `DELETE /api/users/:id` | Remove a própria conta (remoção lógica) |
+| `GET /api/tasks` | Lista as tarefas do usuário |
+| `POST /api/tasks` | Cria uma tarefa |
+| `GET /api/tasks/:id` | Consulta uma tarefa |
+| `PATCH /api/tasks/:id` | Atualiza; marcar concluída é `{ "done": true }` |
+| `DELETE /api/tasks/:id` | Remove (remoção lógica) |
+
+Tudo abaixo de `/api/users` e `/api/tasks` exige `Authorization: Bearer <token>`.
+
+**Erros têm código estável e mensagem traduzida.** O `code` não muda com o idioma; a
+mensagem segue o `Accept-Language` da requisição (pt-BR e en-US):
+
+```json
+{ "code": "tasks.not_found", "error": "Tarefa não encontrada" }
+```
+
+Quando a validação reprova campos, vem também um `details` com `field` e `message`.
+
+**Tarefa de outro usuário responde 404, não 403** — quem não é dono não descobre nem
+que ela existe. Conta de outro usuário responde 403, porque ali o id da URL já tem
+de ser o do próprio token.
+
+O registro das decisões técnicas e do que custou descobri-las fica no
+[wiki](wiki/index.md); o [`docs/infra.md`](docs/infra.md) cobre a operação.
+
 ## Desenvolvimento
 
 O código de `web/` e `api/` é montado dentro dos containers, então editar um arquivo
@@ -167,7 +215,7 @@ docker compose down -v               # derruba e APAGA os volumes (zera os banco
 Rodar comandos dentro dos containers:
 
 ```bash
-docker compose exec api npm test         # suíte da API (vitest)
+docker compose exec api npm test         # 51 testes unitários da API
 docker compose exec api npm run typecheck
 docker compose exec web npm test
 docker compose exec api npm run build
@@ -253,15 +301,27 @@ nginx/
 
 api/
   Dockerfile              stages: dev | build | prod
-  src/                    Express + TypeScript (Prisma em src/generated)
+  prisma/                 schema, migrations e seed
+  src/
+    auth/                 login, token, denylist e middleware de rota
+    users/                CRUD da própria conta
+    tasks/                CRUD de tarefas
+    http/                 validação com zod e resposta de erro padronizada
+    i18n/                 mensagens pt-BR e en-US por requisição
+    logging/              pino no stdout e auditoria no Mongo
+    docs/                 documento OpenAPI servido em /api/docs
+    generated/prisma/     client gerado (não versionado)
 
 web/
   Dockerfile              stages: dev | build | prod
   nginx.conf              serve o Angular compilado (stage prod)
   src/app/
-    core/http/            interceptors HTTP
-    navigation/           componente de navegação
+    auth/                 serviço de sessão, guarda e storage
+    login/  register/     telas de entrada
+    board/                lista de tarefas
+    navigation/           header com marca, tema e menu de conta
     task-card/            card de tarefa
+    core/                 interceptor HTTP e tema
     user/                 signal store e model do usuário
 
 docs/
@@ -277,18 +337,39 @@ CLAUDE.md                 schema do wiki
 | Requisito do desafio | Status |
 | --- | --- |
 | Docker + README com setup | ✅ stack de 5 containers, dev e prod |
-| MySQL (dados principais) | ✅ container e credenciais prontos |
-| MongoDB (metadados/logs extras) | ✅ container e credenciais prontos |
-| Frontend Angular 14+ | 🚧 Angular 21 — navegação, task card e store de usuário |
-| API REST Node.js + TypeScript | 🚧 Prisma client gerado; servidor a implementar |
-| CRUD de tarefas + marcar concluída | 🚧 |
-| JWT + autenticação | 🚧 variáveis e interceptor no lugar; fluxo a implementar |
+| MySQL (dados principais) | ✅ `users`, `tasks` e `revoked_tokens` via Prisma |
+| MongoDB (metadados/logs extras) | ✅ `audit_logs` com TTL, gravado a cada escrita |
+| Frontend Angular 14+ | ✅ Angular 21 — login, cadastro, sessão, tema claro/escuro |
+| API REST Node.js + TypeScript | ✅ Express 5 em camadas, i18n, OpenAPI em `/api/docs` |
+| CRUD de tarefas + marcar concluída | ✅ na API; consumo no front em branch aberta |
+| JWT + autenticação | ✅ login, cadastro, rota protegida e logout com revogação |
 | Commits incrementais | ✅ histórico por feature branch |
+| Testes | 🟡 51 unitários na API; front só com specs de instanciação |
 
-O container `techx-api` sobe e reinicia em loop até `api/package.json` e
-`api/src/server.ts` existirem. O contrato que os Dockerfiles esperam de cada
-aplicação — scripts de `package.json`, porta, retry de conexão, pasta de build do
-Angular — está especificado em [`docs/infra.md`](docs/infra.md).
+**O que ainda não está na branch de integração.** O consumo das tarefas pelo front
+(lista, criação, edição, conclusão e remoção), a confirmação em modal com desfazer, e
+a paginação por cursor vivem em `feat/tasks-web`, `feat/task-confirm-undo` e
+`feat/task-pagination`, nessa ordem de dependência. Na `jeferson-ramos` o board ainda
+mostra cards estáticos.
+
+**Os testes da API são unitários, com o Prisma dublado.** São 51 casos cobrindo
+serviços, repositórios, validação, token e auditoria. Eles provam que o código **pede**
+a consulta certa — que o `where` carrega `deletedAt: null`, que `purgeExpired` só
+apaga o vencido, que tarefa alheia vira 404 e não 403 — e **não** que o MySQL responde
+certo. Erro de índice, de collation ou de comportamento do driver passa despercebido:
+isso exigiria teste de integração contra um banco real, que não existe aqui.
+
+A suíte foi validada por mutação: seis comportamentos críticos foram quebrados de
+propósito e cada um derrubou o teste correspondente.
+
+**O que não existe.** Nenhum teste de integração, nenhum teste end-to-end e nenhum CI.
+O front tem specs, mas verificam apenas que os componentes instanciam. Não há refresh
+token: a sessão morre em 1h e o front não trata isso no meio do uso. Não há
+recuperação de senha.
+
+O contrato que os Dockerfiles esperam de cada aplicação — scripts de `package.json`,
+porta, retry de conexão, pasta de build do Angular — está especificado em
+[`docs/infra.md`](docs/infra.md).
 
 ## Problemas comuns
 
