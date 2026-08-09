@@ -12,6 +12,9 @@ export const ptBR = {
     forbidden: 'Você só pode acessar a própria conta',
     currentPasswordInvalid: 'Senha atual inválida',
   },
+  tasks: {
+    notFound: 'Tarefa não encontrada',
+  },
   common: {
     notFound: 'Rota não encontrada',
     internalError: 'Erro interno',

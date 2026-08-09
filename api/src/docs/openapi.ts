@@ -10,6 +10,7 @@ export const openapiDocument = {
     { name: 'Sistema', description: 'Estado do serviço' },
     { name: 'Autenticação', description: 'Cadastro, login e sessão' },
     { name: 'Usuários', description: 'Gestão da própria conta' },
+    { name: 'Tarefas', description: 'To-do list do usuário autenticado' },
   ],
   components: {
     securitySchemes: {
@@ -69,6 +70,57 @@ export const openapiDocument = {
         required: ['user'],
         properties: { user: { $ref: '#/components/schemas/User' } },
       },
+      Task: {
+        type: 'object',
+        required: ['id', 'title', 'description', 'done', 'createdAt', 'updatedAt'],
+        properties: {
+          id: { type: 'string', format: 'uuid', example: 'b3f1c0de-9a2b-4d77-8f3e-1c6a5d0e2b41' },
+          title: { type: 'string', example: 'Configurar projeto Angular' },
+          description: {
+            type: 'string',
+            nullable: true,
+            example: 'Subir a stack e validar o hot reload',
+          },
+          done: { type: 'boolean', example: false },
+          createdAt: { type: 'string', format: 'date-time' },
+          updatedAt: { type: 'string', format: 'date-time' },
+        },
+      },
+      CreateTaskRequest: {
+        type: 'object',
+        required: ['title'],
+        properties: {
+          title: { type: 'string', minLength: 1, maxLength: 255, example: 'Configurar projeto Angular' },
+          description: {
+            type: 'string',
+            nullable: true,
+            maxLength: 5000,
+            example: 'Subir a stack e validar o hot reload',
+          },
+        },
+      },
+      UpdateTaskRequest: {
+        type: 'object',
+        description:
+          'Ao menos um entre title, description e done. Marcar como concluída é done: true.',
+        properties: {
+          title: { type: 'string', minLength: 1, maxLength: 255, example: 'Configurar projeto Angular' },
+          description: { type: 'string', nullable: true, maxLength: 5000, example: null },
+          done: { type: 'boolean', example: true },
+        },
+      },
+      TaskResponse: {
+        type: 'object',
+        required: ['task'],
+        properties: { task: { $ref: '#/components/schemas/Task' } },
+      },
+      TaskListResponse: {
+        type: 'object',
+        required: ['tasks'],
+        properties: {
+          tasks: { type: 'array', items: { $ref: '#/components/schemas/Task' } },
+        },
+      },
       Error: {
         type: 'object',
         required: ['code', 'error'],
@@ -123,6 +175,10 @@ export const openapiDocument = {
       },
       EmailConflict: {
         description: 'E-mail já cadastrado',
+        content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
+      },
+      TaskNotFound: {
+        description: 'Tarefa inexistente, removida ou de outro usuário',
         content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' } } },
       },
     },
@@ -218,6 +274,106 @@ export const openapiDocument = {
         responses: {
           204: { description: 'Token revogado' },
           401: { $ref: '#/components/responses/Unauthorized' },
+        },
+      },
+    },
+    '/tasks': {
+      get: {
+        tags: ['Tarefas'],
+        summary: 'Lista as tarefas do usuário',
+        description: 'Pendentes primeiro, depois as mais recentes. Nunca inclui tarefas de outro usuário.',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          200: {
+            description: 'Tarefas do usuário autenticado',
+            content: {
+              'application/json': { schema: { $ref: '#/components/schemas/TaskListResponse' } },
+            },
+          },
+          401: { $ref: '#/components/responses/Unauthorized' },
+        },
+      },
+      post: {
+        tags: ['Tarefas'],
+        summary: 'Cria uma tarefa',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': { schema: { $ref: '#/components/schemas/CreateTaskRequest' } },
+          },
+        },
+        responses: {
+          201: {
+            description: 'Tarefa criada',
+            content: {
+              'application/json': { schema: { $ref: '#/components/schemas/TaskResponse' } },
+            },
+          },
+          400: { $ref: '#/components/responses/BadRequest' },
+          401: { $ref: '#/components/responses/Unauthorized' },
+        },
+      },
+    },
+    '/tasks/{id}': {
+      parameters: [
+        {
+          name: 'id',
+          in: 'path',
+          required: true,
+          schema: { type: 'string', format: 'uuid' },
+          description:
+            'Tarefa do próprio usuário: a de outro responde 404, não 403. Fora do formato uuid, 400.',
+        },
+      ],
+      get: {
+        tags: ['Tarefas'],
+        summary: 'Consulta uma tarefa',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          200: {
+            description: 'Tarefa',
+            content: {
+              'application/json': { schema: { $ref: '#/components/schemas/TaskResponse' } },
+            },
+          },
+          400: { $ref: '#/components/responses/BadRequest' },
+          401: { $ref: '#/components/responses/Unauthorized' },
+          404: { $ref: '#/components/responses/TaskNotFound' },
+        },
+      },
+      patch: {
+        tags: ['Tarefas'],
+        summary: 'Atualiza a tarefa ou marca como concluída',
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': { schema: { $ref: '#/components/schemas/UpdateTaskRequest' } },
+          },
+        },
+        responses: {
+          200: {
+            description: 'Tarefa atualizada',
+            content: {
+              'application/json': { schema: { $ref: '#/components/schemas/TaskResponse' } },
+            },
+          },
+          400: { $ref: '#/components/responses/BadRequest' },
+          401: { $ref: '#/components/responses/Unauthorized' },
+          404: { $ref: '#/components/responses/TaskNotFound' },
+        },
+      },
+      delete: {
+        tags: ['Tarefas'],
+        summary: 'Remove uma tarefa',
+        description: 'Remoção lógica: a linha permanece com deleted_at e some das consultas.',
+        security: [{ bearerAuth: [] }],
+        responses: {
+          204: { description: 'Removida' },
+          400: { $ref: '#/components/responses/BadRequest' },
+          401: { $ref: '#/components/responses/Unauthorized' },
+          404: { $ref: '#/components/responses/TaskNotFound' },
         },
       },
     },

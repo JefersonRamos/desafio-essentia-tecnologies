@@ -11,6 +11,7 @@ import { i18nMiddleware } from './i18n/index.js';
 import { logger } from './logging/logger.js';
 import { authRouter } from './auth/auth.routes.js';
 import { userRouter } from './users/user.routes.js';
+import { taskRouter } from './tasks/task.routes.js';
 import { openapiDocument } from './docs/openapi.js';
 
 export function createApp(): Express {
@@ -25,6 +26,7 @@ export function createApp(): Express {
 
   app.use('/api/auth', authRouter);
   app.use('/api/users', userRouter);
+  app.use('/api/tasks', taskRouter);
 
   app.get('/api/openapi.json', (_req: Request, res: Response) => {
     res.json(openapiDocument);
