@@ -167,6 +167,8 @@ docker compose down -v               # derruba e APAGA os volumes (zera os banco
 Rodar comandos dentro dos containers:
 
 ```bash
+docker compose exec api npm test         # suíte da API (vitest)
+docker compose exec api npm run typecheck
 docker compose exec web npm test
 docker compose exec api npm run build
 ```
