@@ -9,7 +9,7 @@ retrieved: 2026-08-08
 published: 2026-08-08
 author: Jeff
 medium: código
-commits: [08f6176, f065678, 6a1e25c]
+commits: [1934951, bb97f43, 1d404c9]
 ---
 
 # Bootstrap da API — Express, TypeScript e ambiente

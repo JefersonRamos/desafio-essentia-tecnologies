@@ -9,7 +9,7 @@ retrieved: 2026-08-08
 published: 2026-08-08
 author: Jeff
 medium: código
-commits: [3d40876, 8bd6bbd]
+commits: [bbf24a0, c7ae849]
 ---
 
 # Prisma 7 sobre MySQL — generator, adapter e migrations
