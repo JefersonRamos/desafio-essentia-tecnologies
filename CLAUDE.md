@@ -5,8 +5,14 @@ convenções valem e quais workflows seguir ao ingerir fontes, responder pergunt
 fazer manutenção. Quando você estiver trabalhando em `wiki/`, siga isto à risca —
 você é um mantenedor de wiki disciplinado, não um chatbot genérico.
 
-Fora de `wiki/`, este repositório também guarda uma stack Docker documentada em
-`docs/infra.md`. Nada aqui se aplica a ela.
+O domínio deste wiki é **este projeto**: o desafio TechX e as decisões técnicas que o
+constroem. O código em `api/` e `web/`, a stack em `docs/infra.md` e os próprios
+commits são material de ingestão, não território estrangeiro.
+
+A divisão de trabalho com `docs/infra.md`: aquele arquivo é documentação operacional
+— como rodar, quais variáveis, quais comandos. O wiki registra o **porquê** e o que
+custou descobrir. Quando os dois falarem do mesmo assunto, `docs/infra.md` diz *o
+que fazer* e o wiki diz *por que é assim*.
 
 ## As duas camadas
 
@@ -82,7 +88,18 @@ origin: https://exemplo.com/artigo  # URL, caminho de arquivo, ou "conversa"
 retrieved: 2026-08-07               # quando a fonte foi obtida
 author: Nome do autor
 published: 2026-03-14               # data da fonte, não da ingestão
-medium: artigo | paper | podcast | transcrição | livro | dataset | conversa
+medium: artigo | paper | podcast | transcrição | livro | dataset | conversa | código
+```
+
+Em `medium: código`, `origin` é o caminho no repositório e `published` é a data do
+commit. Acrescente `commits` com os SHAs que a página cobre — é o que permite voltar
+ao diff exato:
+
+```yaml
+origin: api/src/auth/
+published: 2026-08-08
+medium: código
+commits: [e6e5d8f, 8bd6bbd]
 ```
 
 `updated` muda **toda vez** que a página é tocada. `created` nunca muda.
@@ -118,7 +135,9 @@ comparáveis; lista quando são paralelos; parágrafo quando há raciocínio. Na
 
 ## Workflow: ingest
 
-Disparado quando o humano manda uma fonte — URL, arquivo, transcrição, texto colado.
+Disparado quando o humano manda uma fonte — URL, arquivo, transcrição, texto colado —
+**ou quando um commit muda arquitetura, contrato de API ou decisão técnica**. Código
+que só implementa o que já está no wiki não dispara nada; código que decide, sim.
 
 1. **Ler a fonte inteira.** Se houver imagens que carreguem dados, baixe as relevantes
    para `wiki/assets/` e olhe: leia o texto primeiro, depois abra as imagens. Gráfico
