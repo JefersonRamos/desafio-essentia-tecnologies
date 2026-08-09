@@ -54,5 +54,16 @@
         />
       }
     </div>
+
+    @if (store.nextCursor()) {
+      <button
+        type="button"
+        (click)="store.loadMore()"
+        [disabled]="store.loadingMore()"
+        class="cursor-pointer self-center rounded-input border border-line bg-surface px-4 py-2 text-[12.5px] font-medium text-secondary hover:bg-surface-hover hover:text-ink disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        {{ store.loadingMore() ? 'Carregando…' : 'Carregar mais' }}
+      </button>
+    }
   }
 </main>

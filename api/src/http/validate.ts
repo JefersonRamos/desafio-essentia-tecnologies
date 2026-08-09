@@ -19,6 +19,10 @@ export function parseParams<T>(schema: ZodType<T>, params: unknown): T {
   return parse(schema, params);
 }
 
+export function parseQuery<T>(schema: ZodType<T>, query: unknown): T {
+  return parse(schema, query);
+}
+
 function parse<T>(schema: ZodType<T>, data: unknown): T {
   const result = schema.safeParse(data);
 

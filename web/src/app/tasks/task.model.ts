@@ -7,6 +7,11 @@ export interface Task {
   readonly updatedAt: string;
 }
 
+export interface TaskPage {
+  readonly tasks: Task[];
+  readonly nextCursor: string | null;
+}
+
 export interface NewTask {
   title: string;
   description?: string | null;

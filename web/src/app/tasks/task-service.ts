@@ -1,14 +1,16 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { map, type Observable } from 'rxjs';
-import type { NewTask, Task, TaskChanges } from './task.model';
+import type { NewTask, Task, TaskChanges, TaskPage } from './task.model';
 
 @Injectable({ providedIn: 'root' })
 export class TaskService {
   private readonly http = inject(HttpClient);
 
-  list(): Observable<Task[]> {
-    return this.http.get<{ tasks: Task[] }>('/api/tasks').pipe(map((body) => body.tasks));
+  list(cursor?: string): Observable<TaskPage> {
+    return this.http.get<TaskPage>('/api/tasks', {
+      params: cursor ? { cursor } : {},
+    });
   }
 
   create(task: NewTask): Observable<Task> {

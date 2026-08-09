@@ -8,15 +8,27 @@ import { TaskService } from './task-service';
 interface TaskState {
   tasks: Task[];
   loading: boolean;
+  loadingMore: boolean;
   failure: string | null;
   leaving: Task[];
+  nextCursor: string | null;
 }
 
-const INITIAL: TaskState = { tasks: [], loading: false, failure: null, leaving: [] };
+const INITIAL: TaskState = {
+  tasks: [],
+  loading: false,
+  loadingMore: false,
+  failure: null,
+  leaving: [],
+  nextCursor: null,
+};
 
 function ordered(tasks: Task[]): Task[] {
   return [...tasks].sort(
-    (a, b) => Number(a.done) - Number(b.done) || b.createdAt.localeCompare(a.createdAt),
+    (a, b) =>
+      Number(a.done) - Number(b.done) ||
+      b.createdAt.localeCompare(a.createdAt) ||
+      b.id.localeCompare(a.id),
   );
 }
 
@@ -51,9 +63,35 @@ export const TaskStore = signalStore(
         patchState(store, { loading: true, failure: null });
 
         service.list().subscribe({
-          next: (tasks) => patchState(store, { tasks: ordered(tasks), loading: false }),
+          next: (page) =>
+            patchState(store, {
+              tasks: ordered(page.tasks),
+              nextCursor: page.nextCursor,
+              loading: false,
+            }),
           error: (response: HttpErrorResponse) =>
             fail(response, 'Não foi possível carregar as tarefas.'),
+        });
+      },
+
+      loadMore(): void {
+        const cursor = store.nextCursor();
+
+        if (!cursor || store.loadingMore()) return;
+
+        patchState(store, { loadingMore: true, failure: null });
+
+        service.list(cursor).subscribe({
+          next: (page) =>
+            patchState(store, {
+              tasks: ordered([...store.tasks(), ...page.tasks]),
+              nextCursor: page.nextCursor,
+              loadingMore: false,
+            }),
+          error: (response: HttpErrorResponse) => {
+            patchState(store, { loadingMore: false });
+            fail(response, 'Não foi possível carregar mais tarefas.');
+          },
         });
       },
 

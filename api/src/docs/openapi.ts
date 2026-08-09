@@ -116,9 +116,17 @@ export const openapiDocument = {
       },
       TaskListResponse: {
         type: 'object',
-        required: ['tasks'],
+        required: ['tasks', 'nextCursor'],
         properties: {
           tasks: { type: 'array', items: { $ref: '#/components/schemas/Task' } },
+          nextCursor: {
+            type: 'string',
+            format: 'uuid',
+            nullable: true,
+            description:
+              'Passe em cursor para pedir a página seguinte. null quando não há mais nada.',
+            example: 'b3f1c0de-9a2b-4d77-8f3e-1c6a5d0e2b41',
+          },
         },
       },
       Error: {
@@ -281,8 +289,26 @@ export const openapiDocument = {
       get: {
         tags: ['Tarefas'],
         summary: 'Lista as tarefas do usuário',
-        description: 'Pendentes primeiro, depois as mais recentes. Nunca inclui tarefas de outro usuário.',
+        description:
+          'Pendentes primeiro, depois as mais recentes, com o id como desempate para a ordem ser total. Paginação por cursor: repita a chamada passando o nextCursor devolvido até ele vir null. Nunca inclui tarefas de outro usuário.',
         security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: 'limit',
+            in: 'query',
+            required: false,
+            schema: { type: 'integer', minimum: 1, maximum: 100, default: 20 },
+            description: 'Quantas tarefas trazer por página.',
+          },
+          {
+            name: 'cursor',
+            in: 'query',
+            required: false,
+            schema: { type: 'string', format: 'uuid' },
+            description:
+              'O nextCursor da página anterior. Trate como opaco: hoje é o id da última tarefa da página. Cursor de tarefa removida ou de outro usuário responde 400.',
+          },
+        ],
         responses: {
           200: {
             description: 'Tarefas do usuário autenticado',
@@ -290,6 +316,7 @@ export const openapiDocument = {
               'application/json': { schema: { $ref: '#/components/schemas/TaskListResponse' } },
             },
           },
+          400: { $ref: '#/components/responses/BadRequest' },
           401: { $ref: '#/components/responses/Unauthorized' },
         },
       },
