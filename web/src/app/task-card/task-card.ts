@@ -1,5 +1,5 @@
 import { DatePipe } from "@angular/common";
-import { Component, inject, input, output, signal } from "@angular/core";
+import { Component, effect, inject, input, output, signal } from "@angular/core";
 import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
 import type { Task, TaskChanges } from "../tasks/task.model";
 
@@ -23,6 +23,13 @@ export class TaskCard {
     description: ["", [Validators.maxLength(5000)]],
   });
 
+  constructor() {
+    effect(() => {
+      this.task();
+      this.editing.set(false);
+    });
+  }
+
   protected startEdit(): void {
     const task = this.task();
 
@@ -43,6 +50,5 @@ export class TaskCard {
     }
 
     this.save.emit({ title, description: description.trim() ? description : null });
-    this.editing.set(false);
   }
 }

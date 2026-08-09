@@ -49,8 +49,8 @@
         <app-task-card
           [task]="task"
           (toggle)="store.toggle(task)"
-          (remove)="store.remove(task.id)"
-          (save)="store.update(task.id, $event)"
+          (remove)="remove(task)"
+          (save)="save(task, $event)"
         />
       }
     </div>

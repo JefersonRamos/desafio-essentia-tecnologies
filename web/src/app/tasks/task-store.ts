@@ -9,9 +9,10 @@ interface TaskState {
   tasks: Task[];
   loading: boolean;
   failure: string | null;
+  leaving: Task[];
 }
 
-const INITIAL: TaskState = { tasks: [], loading: false, failure: null };
+const INITIAL: TaskState = { tasks: [], loading: false, failure: null, leaving: [] };
 
 function ordered(tasks: Task[]): Task[] {
   return [...tasks].sort(
@@ -81,15 +82,37 @@ export const TaskStore = signalStore(
         });
       },
 
-      remove(id: string): void {
+      scheduleRemoval(task: Task): void {
+        patchState(store, {
+          tasks: store.tasks().filter((current) => current.id !== task.id),
+          leaving: [...store.leaving(), task],
+          failure: null,
+        });
+      },
+
+      cancelRemoval(id: string): void {
+        const task = store.leaving().find((current) => current.id === id);
+
+        if (!task) return;
+
+        patchState(store, {
+          tasks: ordered([...store.tasks(), task]),
+          leaving: store.leaving().filter((current) => current.id !== id),
+        });
+      },
+
+      commitRemoval(id: string): void {
+        const task = store.leaving().find((current) => current.id === id);
+
+        if (!task) return;
+
+        patchState(store, { leaving: store.leaving().filter((current) => current.id !== id) });
+
         service.remove(id).subscribe({
-          next: () =>
-            patchState(store, {
-              tasks: store.tasks().filter((task) => task.id !== id),
-              failure: null,
-            }),
-          error: (response: HttpErrorResponse) =>
-            fail(response, 'Não foi possível remover a tarefa.'),
+          error: (response: HttpErrorResponse) => {
+            patchState(store, { tasks: ordered([...store.tasks(), task]) });
+            fail(response, 'Não foi possível remover a tarefa.');
+          },
         });
       },
     };
