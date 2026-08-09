@@ -1,9 +1,12 @@
-export const enUS = {
+import type { Messages } from './pt-BR.js';
+
+export const enUS: Messages = {
   auth: {
     credentialsRequired: 'Email and password are required',
     invalidCredentials: 'Invalid credentials',
     tokenMissing: 'Missing token',
     tokenInvalid: 'Invalid token',
+    tokenRevoked: 'Revoked token',
   },
   users: {
     emailTaken: 'Email already registered',
@@ -16,4 +19,4 @@ export const enUS = {
     internalError: 'Internal error',
     validationError: 'Invalid data',
   },
-} as const;
+};
