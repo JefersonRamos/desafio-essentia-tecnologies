@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { tap, type Observable } from 'rxjs';
+import { catchError, map, of, tap, type Observable } from 'rxjs';
 import { UserStore } from '../user/user-store';
 import type { Credentials, Registration, Session } from './auth.model';
 import { clearSession, writeSession } from './session-storage';
@@ -22,13 +22,21 @@ export class AuthService {
       .pipe(tap((session) => this.start(session)));
   }
 
-  signOut(): void {
-    clearSession();
-    this.users.signOut();
+  signOut(): Observable<void> {
+    return this.http.post('/api/auth/logout', {}).pipe(
+      catchError(() => of(null)),
+      tap(() => this.clear()),
+      map(() => undefined),
+    );
   }
 
   private start(session: Session): void {
     writeSession(session);
     this.users.setProfile(session.user);
+  }
+
+  private clear(): void {
+    clearSession();
+    this.users.signOut();
   }
 }
