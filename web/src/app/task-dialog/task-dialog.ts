@@ -31,7 +31,7 @@ export class TaskDialog {
         return;
       }
 
-      this.form.setValue({
+      this.form.reset({
         title: current.title,
         description: current.task?.description ?? '',
       });

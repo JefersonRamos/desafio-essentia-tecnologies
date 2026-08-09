@@ -33,7 +33,7 @@ export class TaskCard {
   protected startEdit(): void {
     const task = this.task();
 
-    this.form.setValue({ title: task.title, description: task.description ?? "" });
+    this.form.reset({ title: task.title, description: task.description ?? "" });
     this.editing.set(true);
   }
 
