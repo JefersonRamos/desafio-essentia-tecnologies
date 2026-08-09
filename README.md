@@ -198,8 +198,8 @@ Quando a validação reprova campos, vem também um `details` com `field` e `mes
 que ela existe. Conta de outro usuário responde 403, porque ali o id da URL já tem
 de ser o do próprio token.
 
-O racional por trás dessas decisões está no [wiki](wiki/index.md); o `docs/infra.md`
-cobre a operação.
+O registro das decisões técnicas e do que custou descobri-las fica no
+[wiki](wiki/index.md); o [`docs/infra.md`](docs/infra.md) cobre a operação.
 
 ## Desenvolvimento
 
@@ -219,7 +219,7 @@ docker compose down -v               # derruba e APAGA os volumes (zera os banco
 Rodar comandos dentro dos containers:
 
 ```bash
-docker compose exec api npm test         # suíte da API (vitest)
+docker compose exec api npm test         # 51 testes unitários da API
 docker compose exec api npm run typecheck
 docker compose exec api npm test         # 76 casos da API
 docker compose exec api npm run lint
