@@ -5,8 +5,15 @@ export const ptBR = {
     tokenMissing: 'Token ausente',
     tokenInvalid: 'Token inválido',
   },
+  users: {
+    emailTaken: 'E-mail já cadastrado',
+    notFound: 'Usuário não encontrado',
+    forbidden: 'Você só pode acessar a própria conta',
+    currentPasswordInvalid: 'Senha atual inválida',
+  },
   common: {
     notFound: 'Rota não encontrada',
     internalError: 'Erro interno',
+    validationError: 'Dados inválidos',
   },
 } as const;
