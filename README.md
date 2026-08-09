@@ -90,6 +90,7 @@ Racional completo da infraestrutura em [`docs/infra.md`](docs/infra.md).
 | Validação | zod na borda, com erro por campo |
 | i18n | i18next — pt-BR e en-US por `Accept-Language` |
 | Documentação | OpenAPI 3.0.3 + Swagger UI |
+| Testes | Vitest — unitários, com Prisma dublado |
 
 **Infra**
 
@@ -193,8 +194,8 @@ Quando a validação reprova campos, vem também um `details` com `field` e `mes
 que ela existe. Conta de outro usuário responde 403, porque ali o id da URL já tem
 de ser o do próprio token.
 
-O racional por trás dessas decisões está no [wiki](wiki/index.md); o `docs/infra.md`
-cobre a operação.
+O registro das decisões técnicas e do que custou descobri-las fica no
+[wiki](wiki/index.md); o [`docs/infra.md`](docs/infra.md) cobre a operação.
 
 ## Desenvolvimento
 
@@ -214,7 +215,7 @@ docker compose down -v               # derruba e APAGA os volumes (zera os banco
 Rodar comandos dentro dos containers:
 
 ```bash
-docker compose exec api npm test         # suíte da API (vitest)
+docker compose exec api npm test         # 51 testes unitários da API
 docker compose exec api npm run typecheck
 docker compose exec web npm test
 docker compose exec api npm run build
@@ -343,6 +344,7 @@ CLAUDE.md                 schema do wiki
 | CRUD de tarefas + marcar concluída | ✅ na API; consumo no front em branch aberta |
 | JWT + autenticação | ✅ login, cadastro, rota protegida e logout com revogação |
 | Commits incrementais | ✅ histórico por feature branch |
+| Testes | 🟡 51 unitários na API; front só com specs de instanciação |
 
 **O que ainda não está na branch de integração.** O consumo das tarefas pelo front
 (lista, criação, edição, conclusão e remoção), a confirmação em modal com desfazer, e
@@ -350,10 +352,20 @@ a paginação por cursor vivem em `feat/tasks-web`, `feat/task-confirm-undo` e
 `feat/task-pagination`, nessa ordem de dependência. Na `jeferson-ramos` o board ainda
 mostra cards estáticos.
 
-**O que não existe.** Não há teste automatizado da API — `createApp()` foi desenhado
-para ser testável e não é testado. O front tem specs, mas verificam apenas que os
-componentes instanciam. Não há refresh token: a sessão morre em 1h e o front não
-trata isso no meio do uso. Não há recuperação de senha.
+**Os testes da API são unitários, com o Prisma dublado.** São 51 casos cobrindo
+serviços, repositórios, validação, token e auditoria. Eles provam que o código **pede**
+a consulta certa — que o `where` carrega `deletedAt: null`, que `purgeExpired` só
+apaga o vencido, que tarefa alheia vira 404 e não 403 — e **não** que o MySQL responde
+certo. Erro de índice, de collation ou de comportamento do driver passa despercebido:
+isso exigiria teste de integração contra um banco real, que não existe aqui.
+
+A suíte foi validada por mutação: seis comportamentos críticos foram quebrados de
+propósito e cada um derrubou o teste correspondente.
+
+**O que não existe.** Nenhum teste de integração, nenhum teste end-to-end e nenhum CI.
+O front tem specs, mas verificam apenas que os componentes instanciam. Não há refresh
+token: a sessão morre em 1h e o front não trata isso no meio do uso. Não há
+recuperação de senha.
 
 O contrato que os Dockerfiles esperam de cada aplicação — scripts de `package.json`,
 porta, retry de conexão, pasta de build do Angular — está especificado em
