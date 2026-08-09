@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import { HttpError } from '../http/http-error.js';
-import { authenticated } from './auth.middleware.js';
+import { authenticated, currentToken } from './auth.middleware.js';
 import * as auth from './auth.service.js';
 
 interface LoginBody {
@@ -23,4 +23,10 @@ export async function login(
 
 export function me(req: Request, res: Response): void {
   res.json({ user: authenticated(req) });
+}
+
+export async function logout(req: Request, res: Response): Promise<void> {
+  await auth.logout(currentToken(req));
+
+  res.status(204).end();
 }
