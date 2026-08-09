@@ -1,6 +1,8 @@
 import { HttpError } from '../http/http-error.js';
 import type { User } from '../users/user.model.js';
 import { findByEmail } from '../users/user.repo.js';
+import type { CreateUserInput } from '../users/user.schema.js';
+import * as users from '../users/user.service.js';
 import { verifyPassword } from './password.js';
 import { signToken, type TokenPayload } from './token.js';
 import { revoke } from './token.repo.js';
@@ -8,6 +10,12 @@ import { revoke } from './token.repo.js';
 export interface Session {
   token: string;
   user: User;
+}
+
+export async function register(input: CreateUserInput): Promise<Session> {
+  const user = await users.register(input);
+
+  return { token: signToken(user), user };
 }
 
 export async function login(email: string, password: string): Promise<Session> {
