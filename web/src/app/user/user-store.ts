@@ -1,13 +1,10 @@
 import {computed} from '@angular/core';
 import {patchState, signalStore, withComputed, withMethods, withState} from '@ngrx/signals';
+import {readSession} from '../auth/session-storage';
 import {EMPTY_PROFILE, type UserProfile, type UserProfilePatch} from './user.model';
 
-/** Perfil inicial — valores vindos do design, até haver autenticação de verdade. */
-const INITIAL_PROFILE: UserProfile = {
-  id: null,
-  name: null,
-  email: null
-};
+/** Perfil inicial — retomado da sessão gravada, para o F5 não deslogar. */
+const INITIAL_PROFILE: UserProfile = readSession()?.user ?? EMPTY_PROFILE;
 
 export const UserStore = signalStore(
   {providedIn: 'root'},
