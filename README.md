@@ -148,6 +148,10 @@ docker compose up -d --build
 A primeira execução baixa as imagens base e instala as dependências do front dentro
 do container; leva alguns minutos. As seguintes são quase instantâneas.
 
+A API espera o MySQL ficar saudável, gera o cliente do Prisma e aplica as migrations
+antes de começar a servir — não há passo manual entre subir a stack e usar a
+aplicação.
+
 ### 4. Verifique
 
 ```bash
@@ -254,9 +258,16 @@ docker compose -f docker-compose.prod.yml up -d --build
 | senhas | default do `.env.example` | exigidas do `.env` |
 | MySQL / Mongo | porta em `127.0.0.1` para GUIs | sem porta publicada |
 | projeto | `techx` | `techx-prod` (volumes separados) |
+| migrations | aplicadas no start da API | serviço `migrate`, que roda e encerra antes da API subir |
 
-Em produção as senhas **não têm default**: `MYSQL_ROOT_PASSWORD`, `MYSQL_PASSWORD` e
-`MONGO_ROOT_PASSWORD` precisam estar no `.env` ou os bancos falham no boot.
+Em produção **nada tem default**: `MYSQL_ROOT_PASSWORD`, `MYSQL_PASSWORD`,
+`MONGO_ROOT_PASSWORD` e `JWT_SECRET` precisam estar no `.env`. Sem `JWT_SECRET` o
+compose se recusa a subir, com a mensagem dizendo o que falta — antes de qualquer
+container começar.
+
+O serviço `migrate` existe porque a imagem de produção roda com `--omit=dev` e não
+tem o CLI do Prisma nem a pasta `prisma/`. Ele usa o stage `build`, aplica as
+migrations e encerra; a API só sobe depois que ele termina com sucesso.
 
 ## Docker
 

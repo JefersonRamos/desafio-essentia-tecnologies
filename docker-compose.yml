@@ -61,8 +61,10 @@ services:
     expose:
       - "3000"
     depends_on:
-      - mysql
-      - mongo
+      mysql:
+        condition: service_healthy
+      mongo:
+        condition: service_started
     networks:
       - frontend
       - backend
@@ -81,6 +83,13 @@ services:
       - mysql_data:/var/lib/mysql
     ports:
       - "127.0.0.1:${MYSQL_HOST_PORT:-3306}:3306"
+    healthcheck:
+      test:
+        ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-root_secret}"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
     networks:
       - backend
     restart: unless-stopped
