@@ -1,0 +1,101 @@
+@if (editing()) {
+  <form [formGroup]="form" (ngSubmit)="submitEdit()" class="flex flex-col gap-2">
+    <input
+      formControlName="title"
+      aria-label="Título"
+      class="rounded-input border border-line-strong bg-surface px-2.5 py-1.5 text-[13.5px] font-semibold text-ink"
+    />
+
+    <textarea
+      formControlName="description"
+      rows="2"
+      aria-label="Descrição"
+      placeholder="Descrição"
+      class="resize-y rounded-input border border-line-strong bg-surface px-2.5 py-1.5 text-xs text-secondary placeholder:text-faint"
+    ></textarea>
+
+    <div class="flex items-center gap-2 self-end">
+      <button
+        type="button"
+        (click)="cancelEdit()"
+        class="cursor-pointer rounded-chip border border-line bg-surface px-2.5 py-1 text-[11.5px] text-tertiary hover:bg-surface-hover"
+      >
+        Cancelar
+      </button>
+
+      <button
+        type="submit"
+        class="cursor-pointer rounded-chip bg-ink px-2.5 py-1 text-[11.5px] font-semibold text-surface hover:bg-ink-hover"
+      >
+        Salvar
+      </button>
+    </div>
+  </form>
+} @else {
+  <div class="flex items-start gap-2.5">
+    <button
+      type="button"
+      (click)="toggle.emit()"
+      [attr.aria-pressed]="task().done"
+      [title]="task().done ? 'Marcar como pendente' : 'Marcar como concluída'"
+      [attr.aria-label]="task().done ? 'Marcar como pendente' : 'Marcar como concluída'"
+      [class]="
+        task().done
+          ? 'border-success bg-success text-surface'
+          : 'border-line-strong bg-surface hover:border-success'
+      "
+      class="mt-0.5 grid size-[18px] flex-none cursor-pointer place-items-center rounded-tag border"
+    >
+      @if (task().done) {
+        <i class="fa-solid fa-check text-[9px]"></i>
+      }
+    </button>
+
+    <div class="flex min-w-0 flex-col gap-0.5">
+      <span
+        [class]="task().done ? 'text-muted line-through' : 'text-ink'"
+        class="text-[13.5px] leading-[1.35] font-semibold"
+      >
+        {{ task().title }}
+      </span>
+
+      @if (task().description) {
+        <span class="text-xs whitespace-pre-line text-muted">{{ task().description }}</span>
+      }
+    </div>
+
+    <span
+      [class]="task().done ? 'bg-success-soft text-success' : 'bg-surface-pill text-strong'"
+      class="ml-auto flex-none rounded-tag px-2 py-0.5 text-[11px] font-semibold"
+    >
+      {{ task().done ? 'Concluída' : 'Pendente' }}
+    </span>
+  </div>
+
+  <div class="flex items-center gap-2 border-t border-line-subtle pt-[9px]">
+    <span class="inline-flex items-center gap-[5px] text-[11.5px] text-muted">
+      <i class="fa-regular fa-calendar"></i>
+      {{ task().createdAt | date: "d 'de' MMM 'de' y" }}
+    </span>
+
+    <button
+      type="button"
+      (click)="startEdit()"
+      title="Editar"
+      aria-label="Editar"
+      class="ml-auto grid size-[26px] cursor-pointer place-items-center rounded-chip border border-line bg-surface text-[13px] text-tertiary hover:bg-surface-hover hover:text-ink"
+    >
+      <i class="fa-solid fa-pencil"></i>
+    </button>
+
+    <button
+      type="button"
+      (click)="remove.emit()"
+      title="Remover"
+      aria-label="Remover"
+      class="grid size-[26px] cursor-pointer place-items-center rounded-chip border border-line bg-surface text-[13px] text-tertiary hover:border-danger-line hover:bg-danger-soft hover:text-danger"
+    >
+      <i class="fa-solid fa-trash"></i>
+    </button>
+  </div>
+}

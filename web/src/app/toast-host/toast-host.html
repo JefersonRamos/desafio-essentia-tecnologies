@@ -1,0 +1,40 @@
+<div
+  aria-live="polite"
+  class="pointer-events-none fixed inset-x-0 bottom-0 z-30 flex flex-col items-center gap-2 px-4 pb-5"
+>
+  @for (toast of toasts.toasts(); track toast.id) {
+    <div
+      class="pointer-events-auto w-[min(92vw,420px)] overflow-hidden rounded-pop border border-line bg-surface shadow-pop"
+    >
+      <div class="flex items-center gap-3 px-4 py-3">
+        <span class="min-w-0 flex-1 truncate text-[12.5px] text-ink">{{ toast.message }}</span>
+
+        @if (toast.action; as action) {
+          <button
+            type="button"
+            (click)="run(toast)"
+            class="flex-none cursor-pointer rounded-chip border border-line bg-surface px-2.5 py-1 text-[11.5px] font-semibold text-ink hover:bg-surface-hover"
+          >
+            {{ action.label }}
+          </button>
+        }
+
+        <button
+          type="button"
+          (click)="dismiss(toast)"
+          title="Fechar"
+          aria-label="Fechar"
+          class="grid size-6 flex-none cursor-pointer place-items-center rounded-chip text-[11px] text-tertiary hover:bg-surface-hover hover:text-ink"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div
+        class="timer h-[3px] bg-ink/25"
+        [style.animation-duration.ms]="toast.duration"
+        aria-hidden="true"
+      ></div>
+    </div>
+  }
+</div>

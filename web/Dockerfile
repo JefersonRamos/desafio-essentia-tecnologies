@@ -8,8 +8,7 @@ COPY package*.json ./
 # ---- dev (ng serve com hot reload) ----------------------------------------
 FROM base AS dev
 ENV NODE_ENV=development
-RUN echo 'Hello World'
-# RUN npm install
+RUN npm install
 COPY . .
 EXPOSE 80
 CMD ["npm", "start", "--", "--host", "0.0.0.0", "--port", "80", "--poll", "2000"]

@@ -6,9 +6,12 @@ import express, {
 } from 'express';
 import swaggerUi from 'swagger-ui-express';
 import { errorCode, fail } from './http/fail.js';
+import { HttpError } from './http/http-error.js';
 import { i18nMiddleware } from './i18n/index.js';
 import { logger } from './logging/logger.js';
 import { authRouter } from './auth/auth.routes.js';
+import { userRouter } from './users/user.routes.js';
+import { taskRouter } from './tasks/task.routes.js';
 import { openapiDocument } from './docs/openapi.js';
 
 export function createApp(): Express {
@@ -22,6 +25,8 @@ export function createApp(): Express {
   });
 
   app.use('/api/auth', authRouter);
+  app.use('/api/users', userRouter);
+  app.use('/api/tasks', taskRouter);
 
   app.get('/api/openapi.json', (_req: Request, res: Response) => {
     res.json(openapiDocument);
@@ -38,6 +43,11 @@ export function createApp(): Express {
   });
 
   app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
+    if (error instanceof HttpError) {
+      fail(res, error.status, error.key, error.details);
+      return;
+    }
+
     logger.error({ error, code: errorCode('common.internalError') }, 'erro nao tratado');
     fail(res, 500, 'common.internalError');
   });

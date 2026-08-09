@@ -4,9 +4,25 @@ export const ptBR = {
     invalidCredentials: 'Credenciais inválidas',
     tokenMissing: 'Token ausente',
     tokenInvalid: 'Token inválido',
+    tokenRevoked: 'Token revogado',
+  },
+  users: {
+    emailTaken: 'E-mail já cadastrado',
+    notFound: 'Usuário não encontrado',
+    forbidden: 'Você só pode acessar a própria conta',
+    currentPasswordInvalid: 'Senha atual inválida',
+  },
+  tasks: {
+    notFound: 'Tarefa não encontrada',
+    invalidCursor: 'Cursor inválido ou expirado — recomece a listagem',
   },
   common: {
     notFound: 'Rota não encontrada',
     internalError: 'Erro interno',
+    validationError: 'Dados inválidos',
   },
 } as const;
+
+export type Messages = {
+  [Group in keyof typeof ptBR]: Record<keyof (typeof ptBR)[Group], string>;
+};

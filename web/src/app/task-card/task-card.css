@@ -1,0 +1,14 @@
+@reference '../../styles.css';
+
+:host {
+  @apply flex cursor-grab flex-col gap-[9px] rounded-card border border-line bg-surface p-[13px] shadow-card;
+  animation: var(--animate-card-in);
+}
+
+:host(:hover) {
+  @apply border-line-strong shadow-lift;
+}
+
+:host([data-dragging='true']) {
+  @apply opacity-40;
+}

@@ -1,40 +1,15 @@
-import { Router, type Request, type Response } from 'express';
-import { fail } from '../http/fail.js';
-import { findByEmail } from '../users/user.repo.js';
+import { Router } from 'express';
+import { validateBody } from '../http/validate.js';
+import { createUserSchema } from '../users/user.schema.js';
+import * as controller from './auth.controller.js';
 import { requireAuth } from './auth.middleware.js';
-import { verifyPassword } from './password.js';
-import { signToken } from './token.js';
 
 export const authRouter = Router();
 
-interface LoginBody {
-  email?: unknown;
-  password?: unknown;
-}
+authRouter.post('/register', validateBody(createUserSchema), controller.register);
 
-authRouter.post('/login', async (req: Request<unknown, unknown, LoginBody>, res: Response) => {
-  const { email, password } = req.body ?? {};
+authRouter.post('/login', controller.login);
 
-  if (typeof email !== 'string' || typeof password !== 'string' || !email || !password) {
-    fail(res, 400, 'auth.credentialsRequired');
-    return;
-  }
+authRouter.get('/me', requireAuth, controller.me);
 
-  const user = await findByEmail(email);
-
-  const verified = user ? await verifyPassword(password, user.passwordHash) : false;
-
-  if (!user || !verified) {
-    fail(res, 401, 'auth.invalidCredentials');
-    return;
-  }
-
-  res.json({
-    token: signToken(user),
-    user: { id: user.id, name: user.name, email: user.email },
-  });
-});
-
-authRouter.get('/me', requireAuth, (req: Request, res: Response) => {
-  res.json({ user: req.user });
-});
+authRouter.post('/logout', requireAuth, controller.logout);

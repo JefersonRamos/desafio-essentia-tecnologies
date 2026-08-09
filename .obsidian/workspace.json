@@ -11,10 +11,17 @@
             "id": "7f9d29a3bae722f0",
             "type": "leaf",
             "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Graph view"
+              "type": "canvas",
+              "state": {
+                "file": "wiki/Untitled.canvas",
+                "viewState": {
+                  "x": 0,
+                  "y": 0,
+                  "zoom": 0
+                }
+              },
+              "icon": "lucide-layout-dashboard",
+              "title": "Untitled"
             }
           }
         ]
@@ -95,6 +102,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "wiki/Untitled.canvas",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -113,6 +121,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
+                "file": "wiki/Untitled.canvas",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
@@ -155,6 +164,7 @@
             "state": {
               "type": "outline",
               "state": {
+                "file": "wiki/Untitled.canvas",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -184,7 +194,6 @@
   "active": "7f9d29a3bae722f0",
   "lastOpenFiles": [
     "web/src/app/app.html~",
-    "web/src/app/task-card/task-card.css~",
     "web/src/app/task-card/task-card.html~",
     "web/src/app/app.ts~",
     "web/dist/code/browser/media/fa-v4compatibility-4GXT74DT.woff2",
@@ -194,6 +203,7 @@
     "web/dist/code/browser/styles-MWBVPYHP.css",
     "web/dist/code/browser/media",
     "web/dist/code/browser/main-HSMM55MR.js",
+    "web/dist/code/browser/index.html",
     "web/README.md",
     "wiki/index.md",
     "wiki/Untitled.canvas",
