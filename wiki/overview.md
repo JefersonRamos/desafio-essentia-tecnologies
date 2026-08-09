@@ -2,7 +2,7 @@
 type: meta
 title: Visão geral
 created: 2026-08-07
-updated: 2026-08-08
+updated: 2026-08-09
 tags: [meta]
 ---
 
@@ -24,18 +24,21 @@ variáveis, como rodar); o wiki diz **por que é assim** e o que custou descobri
 
 | | |
 |---|---|
-| Fontes ingeridas | 7 |
-| Páginas | 11 |
-| Última ingestão | 2026-08-08 — API completa e infraestrutura |
-| Contradições abertas | 4 |
-| Cobertura | API e infra ingeridas; front **não** (ver gaps) |
+| Fontes ingeridas | 12 |
+| Páginas | 20 |
+| Última ingestão | 2026-08-09 — domínio de tarefas, front e paginação |
+| Contradições abertas | 3 |
+| Cobertura | API e infra completas; front ingerido; três branches ainda fora da integração |
 
 ## Por onde começar
 
 - [[docs-infra]] — a fonte-raiz. Topologia, redes, o contrato que os Dockerfiles
   impõem às aplicações. Quase tudo o mais herda restrição daqui.
 - [[api-express-bootstrap]] — as convenções que toda página de API assume.
-- [[synthesis]] — a tese corrente, as 4 contradições abertas e os gaps.
+- [[api-tasks-crud]] — o domínio do desafio, e a porta de entrada para os conceitos
+  de posse e remoção.
+- [[synthesis]] — a tese corrente, as 3 contradições abertas, os gaps e o que já foi
+  revertido.
 - [[index]] — catálogo completo, com um resumo por página.
 
 ## Como usar
